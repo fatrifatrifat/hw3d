@@ -1,4 +1,27 @@
-float4 main(float2 pos : POSITION) : SV_Position
+cbuffer CBuf
 {
-    return float4(pos, 0.0f, 1.0f);
+    matrix transform;
+};
+
+struct VS_INPUT
+{
+    float3 position : POSITION;
+    float4 color : COLOR;
+};
+
+struct VS_OUTPUT
+{
+    float4 position : SV_POSITION; 
+    float4 color : COLOR;
+};
+
+VS_OUTPUT main(VS_INPUT input)
+{
+    VS_OUTPUT output;
+    
+    output.position = mul(float4(input.position, 1.0f), transform);
+    
+    output.color = input.color;
+
+    return output;
 }
