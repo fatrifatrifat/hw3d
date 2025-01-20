@@ -8,6 +8,10 @@
 #include <optional>
 #include <wrl\client.h>
 #include <cmath>
+#include <vector>
+#include <memory>
+#include "GeometryGenerator.h"
+#include "Scene.h"
 #include "GameTimer.h"
 #include "Utils.h"
 
@@ -68,6 +72,12 @@ protected:
 	ID3DBlob* pBlob;
 
 private:
+	float GetHeight(float x, float z) const;
+
+private:
+	std::vector<std::unique_ptr<Scene>> scenes;
+	std::vector<std::unique_ptr<Scene>>::iterator currScene;
+
 	struct Vertex
 	{
 		DirectX::XMFLOAT3 pos;
@@ -78,6 +88,10 @@ private:
 	{
 		DirectX::XMFLOAT4X4 worldViewProj;
 	};
+	
+	DirectX::XMFLOAT4X4 mGridWorld;
+
+	UINT mGridIndexCount;
 
 	DirectX::XMFLOAT4X4 mWorld;
 	DirectX::XMFLOAT4X4 mView;

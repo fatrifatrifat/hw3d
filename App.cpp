@@ -1,4 +1,5 @@
 #include "App.h"
+#include "BoxScene.h"
 
 namespace
 {
@@ -211,15 +212,15 @@ void App::UpdateScene(float dt)
 {
 	using namespace DirectX;
 
-	mTheta += dTheta * dt;
+	/*mTheta += dTheta * dt;
 	mPhi += dTheta * dt;
 
 	float x = mRadius * sinf(mPhi) * cosf(mTheta);
 	float z = mRadius * sinf(mPhi) * sinf(mTheta);
-	float y = mRadius * cosf(mPhi);
+	float y = mRadius * cosf(mPhi);*/
 
 	// Build the view matrix
-	XMVECTOR pos = XMVectorSet(x, y, z, 1.0f);
+	XMVECTOR pos = XMVectorSet(0, 0, -10, 1.0f);
 	XMVECTOR target = XMVectorZero();
 	XMVECTOR up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
 	XMMATRIX view = XMMatrixLookAtLH(pos, target, up);
@@ -251,13 +252,10 @@ void App::Draw()
 
 	// bind vertex shader
 	pImmediateContext->VSSetShader(pVertexShader, nullptr, 0u);
-	pImmediateContext->VSSetConstantBuffers(0u, 1u, &pCB);
+	pImmediateContext->VSSetConstantBuffers(0u, 1u, &pCB);	
 
 	// bind vertex layout
 	pImmediateContext->IASetInputLayout(pInputLayout);
-
-	// bind render target
-	pImmediateContext->OMSetRenderTargets(1u, &pRVT, nullptr);
 
 	pImmediateContext->DrawIndexed(36u, 0u, 0u);
 }
@@ -270,73 +268,81 @@ void App::EndFrame()
 void App::BuildBuffers()
 {
 	using namespace DirectX;
-	// create vertex buffer (1 2d triangle at center of screen)
-	const Vertex vertices[] =
+
+	GeometryGenerator::MeshData grid;
+
+	GeometryGenerator geoGen;
+
+	geoGen.CreateGrid(160.0f, 160.0f, 50, 50, grid);
+
+	mGridIndexCount = grid.Indices.size();
+
+	//
+	// Extract the vertex elements we are interested and apply the height function to
+	// each vertex.  In addition, color the vertices based on their height so we have
+	// sandy looking beaches, grassy low hills, and snow mountain peaks.
+	//
+
+	std::vector<Vertex> vertices(grid.Vertices.size());
+	for (size_t i = 0; i < grid.Vertices.size(); ++i)
 	{
-		{ XMFLOAT3(-1.0f, +1.0f, -1.0f), Colors::red },
-		{ XMFLOAT3(-1.0f, -1.0f, -1.0f), Colors::gold },
-		{ XMFLOAT3(+1.0f, +1.0f, -1.0f), Colors::lime },
-		{ XMFLOAT3(+1.0f, -1.0f, -1.0f), Colors::white },
-		{ XMFLOAT3(-1.0f, -1.0f, +1.0f), Colors::pink },
-		{ XMFLOAT3(-1.0f, +1.0f, +1.0f), Colors::orange },
-		{ XMFLOAT3(+1.0f, +1.0f, +1.0f), Colors::black },
-		{ XMFLOAT3(+1.0f, -1.0f, +1.0f), Colors::magenta }
-	};
+		XMFLOAT3 p = grid.Vertices[i].Position;
 
-	D3D11_BUFFER_DESC bd = {};
-	bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	bd.Usage = D3D11_USAGE_DEFAULT;
-	bd.CPUAccessFlags = 0u;
-	bd.MiscFlags = 0u;
-	bd.ByteWidth = sizeof(vertices);
-	bd.StructureByteStride = sizeof(Vertex);
-	D3D11_SUBRESOURCE_DATA sd = {};
-	sd.pSysMem = vertices;
-	pDevice->CreateBuffer(&bd, &sd, &pVB);
+		p.y = GetHeight(p.x, p.z);
 
-	const unsigned short indices[] = {
-		// Front face
-		0, 2, 1, 2, 3, 1,
+		vertices[i].pos = p;
 
-		// Back face
-		5, 4, 6, 6, 4, 7,
+		// Color the vertex based on its height.
+		if (p.y < -10.0f)
+		{
+			// Sandy beach color.
+			vertices[i].color = XMFLOAT4(1.0f, 0.96f, 0.62f, 1.0f);
+		}
+		else if (p.y < 5.0f)
+		{
+			// Light yellow-green.
+			vertices[i].color = XMFLOAT4(0.48f, 0.77f, 0.46f, 1.0f);
+		}
+		else if (p.y < 12.0f)
+		{
+			// Dark yellow-green.
+			vertices[i].color = XMFLOAT4(0.1f, 0.48f, 0.19f, 1.0f);
+		}
+		else if (p.y < 20.0f)
+		{
+			// Dark brown.
+			vertices[i].color = XMFLOAT4(0.45f, 0.39f, 0.34f, 1.0f);
+		}
+		else
+		{
+			// White snow.
+			vertices[i].color = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+		}
+	}
 
-		// Left face
-		5, 0, 4, 4, 0, 1,
+	D3D11_BUFFER_DESC vbd;
+	vbd.Usage = D3D11_USAGE_IMMUTABLE;
+	vbd.ByteWidth = sizeof(Vertex) * grid.Vertices.size();
+	vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	vbd.CPUAccessFlags = 0;
+	vbd.MiscFlags = 0;
+	D3D11_SUBRESOURCE_DATA vinitData;
+	vinitData.pSysMem = &vertices[0];
+	pDevice->CreateBuffer(&vbd, &vinitData, &pVB);
 
-		// Right face
-		2, 6, 3, 3, 6, 7,
+	//
+	// Pack the indices of all the meshes into one index buffer.
+	//
 
-		// Top face
-		5, 2, 0, 5, 6, 2,
-
-		// Bottom face
-		1, 3, 4, 4, 3, 7
-	};
-
-
-
-	D3D11_BUFFER_DESC ibd = {};
+	D3D11_BUFFER_DESC ibd;
+	ibd.Usage = D3D11_USAGE_IMMUTABLE;
+	ibd.ByteWidth = sizeof(UINT) * mGridIndexCount;
 	ibd.BindFlags = D3D11_BIND_INDEX_BUFFER;
-	ibd.Usage = D3D11_USAGE_DEFAULT;
-	ibd.CPUAccessFlags = 0u;
-	ibd.MiscFlags = 0u;
-	ibd.ByteWidth = sizeof(indices);
-	ibd.StructureByteStride = sizeof(unsigned short);
-	D3D11_SUBRESOURCE_DATA isd = {};
-	isd.pSysMem = indices;
-	pDevice->CreateBuffer(&ibd, &isd, &pIB);
-
-	/*D3D11_BUFFER_DESC cbd = {};
-	cbd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	cbd.Usage = D3D11_USAGE_DYNAMIC;
-	cbd.CPUAccessFlags = D3D10_CPU_ACCESS_WRITE;
-	cbd.MiscFlags = 0u;
-	cbd.ByteWidth = sizeof(ConstantBuffer);
-	cbd.StructureByteStride = 0u;
-	D3D11_SUBRESOURCE_DATA csd = {};
-	csd.pSysMem = &cb;
-	pDevice->CreateBuffer(&cbd, &csd, &pCB);*/
+	ibd.CPUAccessFlags = 0;
+	ibd.MiscFlags = 0;
+	D3D11_SUBRESOURCE_DATA iinitData;
+	iinitData.pSysMem = &grid.Indices[0];
+	pDevice->CreateBuffer(&ibd, &iinitData, &pIB);
 
 	D3D11_BUFFER_DESC cbd = {};
 	cbd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
@@ -389,4 +395,9 @@ std::optional<int> App::ProcessMessage()
 	}
 
 	return {};
+}
+
+float App::GetHeight(float x, float z) const
+{
+	return 0.3f * (z * sinf(0.1f * x) + x * cosf(0.1f * z));
 }
