@@ -75,6 +75,15 @@ private:
 	float GetHeight(float x, float z) const;
 
 private:
+	bool keys[256] = { false };
+	float x = 0.f;
+	float y = 0.f;
+	float z = -5.f;
+
+	float vx = 0.f;
+	float vy = 0.f;
+	float vz = 0.f;
+
 	std::vector<std::unique_ptr<Scene>> scenes;
 	std::vector<std::unique_ptr<Scene>>::iterator currScene;
 

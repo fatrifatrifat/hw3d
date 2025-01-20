@@ -98,6 +98,10 @@ LRESULT App::WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	case WM_KEYDOWN:
 		if (wParam == VK_ESCAPE)
 			DestroyWindow(hwnd);
+		keys[wParam] = true;
+		return 0;
+	case WM_KEYUP:
+		keys[wParam] = false;
 		return 0;
 	case WM_DESTROY:
 		PostQuitMessage(0);
@@ -212,15 +216,31 @@ void App::UpdateScene(float dt)
 {
 	using namespace DirectX;
 
+	if (keys['W']) vz = -0.001;
+	else if (keys['S']) vz = 0.001;
+	else vz = 0.f;
+
+	if (keys['A']) vx = 0.001;
+	else if (keys['D']) vx = -0.001;
+	else vx = 0.f;
+
+	if (keys['Q']) vy = 0.001;
+	else if (keys['E']) vy = -0.001 ;
+	else vy = 0.f;
+
 	/*mTheta += dTheta * dt;
 	mPhi += dTheta * dt;
 
-	float x = mRadius * sinf(mPhi) * cosf(mTheta);
+	float x = mRadius * sinf(mPhi) * cosf(mTheta);	
 	float z = mRadius * sinf(mPhi) * sinf(mTheta);
 	float y = mRadius * cosf(mPhi);*/
 
+	x += vx * dt;
+	y += vy * dt;
+	z += vz * dt;
+
 	// Build the view matrix
-	XMVECTOR pos = XMVectorSet(0, 0, -10, 1.0f);
+	XMVECTOR pos = XMVectorSet(x, y, z, 1.0f);
 	XMVECTOR target = XMVectorZero();
 	XMVECTOR up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
 	XMMATRIX view = XMMatrixLookAtLH(pos, target, up);
@@ -257,7 +277,7 @@ void App::Draw()
 	// bind vertex layout
 	pImmediateContext->IASetInputLayout(pInputLayout);
 
-	pImmediateContext->DrawIndexed(36u, 0u, 0u);
+	pImmediateContext->DrawIndexed(14406u, 0u, 0u);
 }
 
 void App::EndFrame()
