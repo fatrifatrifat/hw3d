@@ -168,18 +168,24 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="App.cpp" />
+    <ClCompile Include="D3DApp.cpp" />
     <ClCompile Include="GameTimer.cpp" />
     <ClCompile Include="GeometryGenerator.cpp" />
+    <ClCompile Include="Graphics.cpp" />
     <ClCompile Include="MathHelper.cpp" />
+    <ClCompile Include="System.cpp" />
     <ClCompile Include="WinMain.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.h" />
     <ClInclude Include="BoxScene.h" />
+    <ClInclude Include="D3DApp.h" />
     <ClInclude Include="GameTimer.h" />
     <ClInclude Include="GeometryGenerator.h" />
+    <ClInclude Include="Graphics.h" />
     <ClInclude Include="MathHelper.h" />
     <ClInclude Include="Scene.h" />
+    <ClInclude Include="System.h" />
     <ClInclude Include="Utils.h" />
   </ItemGroup>
   <ItemGroup>
