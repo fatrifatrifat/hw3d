@@ -1,5 +1,6 @@
 #include "D3DApp.h"
 #include "Utils.h"
+#include <algorithm>
 
 D3DApp::D3DApp()
 {
@@ -7,6 +8,18 @@ D3DApp::D3DApp()
 	pDevice = 0;
 	pImmediateContext = 0;
 	pRVT = 0;
+
+	input = std::make_unique<Input>();
+
+	using namespace DirectX;
+
+	XMMATRIX I = XMMatrixIdentity();
+	XMStoreFloat4x4(&mWorldMatrix, I);
+	XMStoreFloat4x4(&mViewMatrix, I);
+	XMStoreFloat4x4(&mProjectionMatrix, I);
+
+	XMMATRIX P = XMMatrixPerspectiveFovLH(0.25f * PI, 800.f/600.f, 1.0f, 1000.0f);
+	XMStoreFloat4x4(&mProjectionMatrix, P);
 }
 
 D3DApp::~D3DApp()
@@ -89,6 +102,67 @@ void D3DApp::BeginScene()
 	pImmediateContext->ClearRenderTargetView(pRVT, reinterpret_cast<const float*>(&Colors::blue));
 }
 
+void D3DApp::UpdateScene(float dt)
+{
+	input->Update();
+	using namespace DirectX;
+
+	if (input->IsKeyPressed('W')) vz = -0.001;
+	else if (input->IsKeyPressed('S')) vz = 0.001;
+	else vz = 0.f;
+
+	if (input->IsKeyPressed('A')) vx = 0.001;
+	else if (input->IsKeyPressed('D')) vx = -0.001;
+	else vx = 0.f;
+
+	if (input->IsKeyPressed('Q')) vy = 0.001;
+	else if (input->IsKeyPressed('E')) vy = -0.001;
+	else vy = 0.f;
+
+	x += vx * dt;
+	y += vy * dt;
+	z += vz * dt;
+
+	// Build the view matrix
+	XMVECTOR pos = XMVectorSet(x, y, z, 1.0f);
+	XMVECTOR target = XMVectorZero();
+	XMVECTOR up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+	XMMATRIX view = XMMatrixLookAtLH(pos, target, up);
+
+	// Build the WVP matrix
+	XMMATRIX world = XMLoadFloat4x4(&mWorldMatrix);
+	XMMATRIX proj = XMLoadFloat4x4(&mProjectionMatrix);
+	XMMATRIX wvp = world * view * proj;
+
+	XMStoreFloat4x4(&mViewMatrix, view);
+	ConstantBuffer cb;
+	XMStoreFloat4x4(&cb.worldViewProj, XMMatrixTranspose(wvp));
+
+	// Update the constant buffer
+	pImmediateContext->UpdateSubresource(pCB, 0, nullptr, &cb, 0, 0);
+}
+
+void D3DApp::DrawScene()
+{
+	// Bind vertex buffer to pipeline
+	const UINT stride = sizeof(Vertex);
+	const UINT offset = 0u;
+	pImmediateContext->IASetVertexBuffers(0u, 1u, &pVB, &stride, &offset);
+	pImmediateContext->IASetIndexBuffer(pIB, DXGI_FORMAT_R16_UINT, 0u);
+
+	// bind pixel shader
+	pImmediateContext->PSSetShader(pPixelShader, nullptr, 0u);
+
+	// bind vertex shader
+	pImmediateContext->VSSetShader(pVertexShader, nullptr, 0u);
+	pImmediateContext->VSSetConstantBuffers(0u, 1u, &pCB);
+
+	// bind vertex layout
+	pImmediateContext->IASetInputLayout(pInputLayout);
+
+	pImmediateContext->DrawIndexed(36u, 0u, 0u);
+}
+
 void D3DApp::EndScene()
 {
 	pSwapChain->Present(0, 0);
@@ -104,14 +178,91 @@ ID3D11DeviceContext* D3DApp::GetDeviceContext() const
 	return pImmediateContext;
 }
 
-void D3DApp::GetProjectionMatrix(DirectX::XMFLOAT4X4&)
+void D3DApp::BuildBuffers()
 {
+	using namespace DirectX;
+
+	const Vertex vertices[] =
+	{
+		{ XMFLOAT3(-1.0f, +1.0f, -1.0f), Colors::red },
+		{ XMFLOAT3(-1.0f, -1.0f, -1.0f), Colors::gold },
+		{ XMFLOAT3(+1.0f, +1.0f, -1.0f), Colors::lime },
+		{ XMFLOAT3(+1.0f, -1.0f, -1.0f), Colors::white },
+		{ XMFLOAT3(-1.0f, -1.0f, +1.0f), Colors::pink },
+		{ XMFLOAT3(-1.0f, +1.0f, +1.0f), Colors::orange },
+		{ XMFLOAT3(+1.0f, +1.0f, +1.0f), Colors::black },
+		{ XMFLOAT3(+1.0f, -1.0f, +1.0f), Colors::magenta }
+	};
+
+	D3D11_BUFFER_DESC vbd;
+	vbd.Usage = D3D11_USAGE_IMMUTABLE;
+	vbd.ByteWidth = sizeof(vertices);
+	vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	vbd.CPUAccessFlags = 0;
+	vbd.MiscFlags = 0;
+	D3D11_SUBRESOURCE_DATA vinitData;
+	vinitData.pSysMem = vertices;
+	pDevice->CreateBuffer(&vbd, &vinitData, &pVB);
+
+	const unsigned short indices[] = {
+		// Front face
+		0, 2, 1, 2, 3, 1,
+
+		// Back face
+		5, 4, 6, 6, 4, 7,
+
+		// Left face
+		5, 0, 4, 4, 0, 1,
+
+		// Right face
+		2, 6, 3, 3, 6, 7,
+
+		// Top face
+		5, 2, 0, 5, 6, 2,
+
+		// Bottom face
+		1, 3, 4, 4, 3, 7
+	};
+
+	D3D11_BUFFER_DESC ibd;
+	ibd.Usage = D3D11_USAGE_IMMUTABLE;
+	ibd.ByteWidth = sizeof(indices);
+	ibd.BindFlags = D3D11_BIND_INDEX_BUFFER;
+	ibd.CPUAccessFlags = 0;
+	ibd.MiscFlags = 0;
+	D3D11_SUBRESOURCE_DATA iinitData;
+	iinitData.pSysMem = indices;
+	pDevice->CreateBuffer(&ibd, &iinitData, &pIB);
+
+	D3D11_BUFFER_DESC cbd = {};
+	cbd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	cbd.Usage = D3D11_USAGE_DEFAULT;
+	cbd.ByteWidth = sizeof(ConstantBuffer);
+	cbd.CPUAccessFlags = 0u;
+	cbd.MiscFlags = 0u;
+	pDevice->CreateBuffer(&cbd, nullptr, &pCB);
 }
 
-void D3DApp::GetWorldMatrix(DirectX::XMFLOAT4X4&)
+void D3DApp::BuildShaders()
 {
+	D3DReadFileToBlob(L"PixelShader.cso", &pBlob);
+	pDevice->CreatePixelShader(pBlob->GetBufferPointer(), pBlob->GetBufferSize(), nullptr, &pPixelShader);
+
+	D3DReadFileToBlob(L"VertexShader.cso", &pBlob);
+	pDevice->CreateVertexShader(pBlob->GetBufferPointer(), pBlob->GetBufferSize(), nullptr, &pVertexShader);
 }
 
-void D3DApp::GetOrthoMatrix(DirectX::XMFLOAT4X4&)
+void D3DApp::BuildInputLayout()
 {
+	const D3D11_INPUT_ELEMENT_DESC ied[] =
+	{
+		{ "POSITION",0,DXGI_FORMAT_R32G32B32_FLOAT,0,0,D3D11_INPUT_PER_VERTEX_DATA,0 },
+		{ "COLOR",0,DXGI_FORMAT_R32G32B32A32_FLOAT,0, 12,D3D11_INPUT_PER_VERTEX_DATA,0 },
+	};
+	pDevice->CreateInputLayout(
+		ied, (UINT)std::size(ied),
+		pBlob->GetBufferPointer(),
+		pBlob->GetBufferSize(),
+		&pInputLayout
+	);
 }
