@@ -1,6 +1,7 @@
 #include "D3DApp.h"
 #include "Utils.h"
 #include <algorithm>
+#include "GeometryGenerator.h"
 
 D3DApp::D3DApp()
 {
@@ -8,7 +9,7 @@ D3DApp::D3DApp()
 	pDevice = 0;
 	pImmediateContext = 0;
 	pRVT = 0;
-
+	
 	input = std::make_unique<Input>();
 
 	using namespace DirectX;
@@ -160,7 +161,7 @@ void D3DApp::DrawScene()
 	// bind vertex layout
 	pImmediateContext->IASetInputLayout(pInputLayout);
 
-	pImmediateContext->DrawIndexed(36u, 0u, 0u);
+	pImmediateContext->DrawIndexed((UINT)mIndexCount, 0u, 0u);
 }
 
 void D3DApp::EndScene()
@@ -182,57 +183,50 @@ void D3DApp::BuildBuffers()
 {
 	using namespace DirectX;
 
-	const Vertex vertices[] =
-	{
-		{ XMFLOAT3(-1.0f, +1.0f, -1.0f), Colors::red },
-		{ XMFLOAT3(-1.0f, -1.0f, -1.0f), Colors::gold },
-		{ XMFLOAT3(+1.0f, +1.0f, -1.0f), Colors::lime },
-		{ XMFLOAT3(+1.0f, -1.0f, -1.0f), Colors::white },
-		{ XMFLOAT3(-1.0f, -1.0f, +1.0f), Colors::pink },
-		{ XMFLOAT3(-1.0f, +1.0f, +1.0f), Colors::orange },
-		{ XMFLOAT3(+1.0f, +1.0f, +1.0f), Colors::black },
-		{ XMFLOAT3(+1.0f, -1.0f, +1.0f), Colors::magenta }
-	};
+	GeometryGenerator geoGen;
+	GeometryGenerator::MeshData boxMesh;
 
-	D3D11_BUFFER_DESC vbd;
+	float width = 2.0f;
+	float height = 2.0f;
+	float depth = 2.0f;
+	//geoGen.CreateBox(width, height, depth, boxMesh);
+	geoGen.CreateSphere(1, 30, 30, boxMesh);
+
+	D3D11_BUFFER_DESC vbd = {};
 	vbd.Usage = D3D11_USAGE_IMMUTABLE;
-	vbd.ByteWidth = sizeof(vertices);
+	vbd.ByteWidth = static_cast<UINT>(sizeof(GeometryGenerator::Vertex) * boxMesh.Vertices.size());
 	vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 	vbd.CPUAccessFlags = 0;
 	vbd.MiscFlags = 0;
-	D3D11_SUBRESOURCE_DATA vinitData;
-	vinitData.pSysMem = vertices;
-	pDevice->CreateBuffer(&vbd, &vinitData, &pVB);
 
-	const unsigned short indices[] = {
-		// Front face
-		0, 2, 1, 2, 3, 1,
+	D3D11_SUBRESOURCE_DATA vinitData = {};
+	vinitData.pSysMem = boxMesh.Vertices.data();
 
-		// Back face
-		5, 4, 6, 6, 4, 7,
+	HRESULT hr = pDevice->CreateBuffer(&vbd, &vinitData, &pVB);
+	if (FAILED(hr))
+	{
+		MessageBox(0, L"Failed to create vertex buffer", 0, 0);
+		return;
+	}
 
-		// Left face
-		5, 0, 4, 4, 0, 1,
-
-		// Right face
-		2, 6, 3, 3, 6, 7,
-
-		// Top face
-		5, 2, 0, 5, 6, 2,
-
-		// Bottom face
-		1, 3, 4, 4, 3, 7
-	};
-
-	D3D11_BUFFER_DESC ibd;
+	D3D11_BUFFER_DESC ibd = {};
 	ibd.Usage = D3D11_USAGE_IMMUTABLE;
-	ibd.ByteWidth = sizeof(indices);
+	ibd.ByteWidth = static_cast<UINT>(sizeof(UINT) * boxMesh.Indices.size());
 	ibd.BindFlags = D3D11_BIND_INDEX_BUFFER;
 	ibd.CPUAccessFlags = 0;
 	ibd.MiscFlags = 0;
-	D3D11_SUBRESOURCE_DATA iinitData;
-	iinitData.pSysMem = indices;
-	pDevice->CreateBuffer(&ibd, &iinitData, &pIB);
+
+	D3D11_SUBRESOURCE_DATA iinitData = {};
+	iinitData.pSysMem = boxMesh.Indices.data();
+
+	mIndexCount = boxMesh.Indices.size();
+
+	hr = pDevice->CreateBuffer(&ibd, &iinitData, &pIB);
+	if (FAILED(hr))
+	{
+		MessageBox(0, L"Failed to create index buffer", 0, 0);
+		return;
+	}
 
 	D3D11_BUFFER_DESC cbd = {};
 	cbd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
@@ -240,8 +234,15 @@ void D3DApp::BuildBuffers()
 	cbd.ByteWidth = sizeof(ConstantBuffer);
 	cbd.CPUAccessFlags = 0u;
 	cbd.MiscFlags = 0u;
-	pDevice->CreateBuffer(&cbd, nullptr, &pCB);
+
+	hr = pDevice->CreateBuffer(&cbd, nullptr, &pCB);
+	if (FAILED(hr))
+	{
+		MessageBox(0, L"Failed to create constant buffer", 0, 0);
+		return;
+	}
 }
+
 
 void D3DApp::BuildShaders()
 {

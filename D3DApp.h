@@ -47,6 +47,8 @@ public:
 private:
 	std::unique_ptr<Input> input;
 
+	unsigned int mIndexCount;
+
 	float x = 0.f;
 	float y = 0.f;
 	float z = -5.f;
