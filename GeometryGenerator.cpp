@@ -26,7 +26,7 @@ void GeometryGenerator::CreateBox(float width, float height, float depth, MeshDa
     meshData.Vertices.emplace_back(XMFLOAT3(+w2, +h2, +d2), Colors::white); // White
     meshData.Vertices.emplace_back(XMFLOAT3(+w2, -h2, +d2), Colors::gray); // Gray
 
-    unsigned short i[36] = {
+    UINT i[36] = {
         // Front face
         0, 2, 1, 2, 3, 1,
         // Back face
@@ -73,14 +73,14 @@ void GeometryGenerator::CreateSphere(float radius, UINT sliceCount, UINT stackCo
 
             Vertex v;
 
-            v.position.x = radius * sinf(phi) * cosf(theta);
-            v.position.y = radius * cosf(phi);
-            v.position.z = radius * sinf(phi) * sinf(theta);
+            v.pos.x = radius * sinf(phi) * cosf(theta);
+            v.pos.y = radius * cosf(phi);
+            v.pos.z = radius * sinf(phi) * sinf(theta);
 
             v.color = XMFLOAT4(
-                v.position.x / radius + 0.5f,
-                v.position.y / radius + 0.5f,
-                v.position.z / radius + 0.5f,
+                v.pos.x / radius + 0.5f,
+                v.pos.y / radius + 0.5f,
+                v.pos.z / radius + 0.5f,
                 1.0f);
 
             meshData.Vertices.push_back(v);
@@ -170,3 +170,49 @@ void GeometryGenerator::CreateGrid(float width, float depth, UINT m, UINT n, Mes
         }
     }
 }
+
+void GeometryGenerator::CreateSkull(MeshData& meshData)
+{
+    std::ifstream fin("Models/Skull.txt");
+
+    if (!fin)
+    {
+        MessageBox(0, L"Models/Skull.txt not found.", 0, 0);
+        return;
+    }
+
+    UINT vcount = 0;
+    UINT tcount = 0;
+    std::string ignore;
+
+    fin >> ignore >> vcount;
+    fin >> ignore >> tcount;
+    fin >> ignore >> ignore >> ignore >> ignore;
+
+    float nx, ny, nz;
+    XMFLOAT4 black(0.0f, 0.0f, 0.0f, 1.0f);
+
+    meshData.Vertices.resize(vcount);
+    for (UINT i = 0; i < vcount; ++i)
+    {
+        fin >> meshData.Vertices[i].pos.x >> meshData.Vertices[i].pos.y >> meshData.Vertices[i].pos.z;
+        meshData.Vertices[i].color = black;
+
+        fin >> nx >> ny >> nz; // Skip normal values
+    }
+
+    fin >> ignore;
+    fin >> ignore;
+    fin >> ignore;
+
+    UINT mSkullIndexCount = 3 * tcount;
+
+    meshData.Indices.resize(mSkullIndexCount);
+    for (UINT i = 0; i < tcount; ++i)
+    {
+        fin >> meshData.Indices[i * 3 + 0] >> meshData.Indices[i * 3 + 1] >> meshData.Indices[i * 3 + 2];
+    }
+
+    fin.close();
+}
+

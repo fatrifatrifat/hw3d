@@ -47,7 +47,7 @@ public:
 private:
 	std::unique_ptr<Input> input;
 
-	unsigned int mIndexCount;
+	UINT mIndexCount;
 
 	float x = 0.f;
 	float y = 0.f;
@@ -57,10 +57,14 @@ private:
 	float vy = 0.f;
 	float vz = 0.f;
 
+	bool currRenderState = true;
+
 	ID3D11Device* pDevice;
 	ID3D11DeviceContext* pImmediateContext;
 	IDXGISwapChain* pSwapChain;
 	ID3D11RenderTargetView* pRVT;
+	ID3D11RasterizerState* pRasterWireFrame;
+	ID3D11RasterizerState* pRasterSolidState;
 	D3D11_VIEWPORT vp;
 
 	ID3D11Buffer* pVB;

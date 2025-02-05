@@ -2,6 +2,7 @@
 #include "Utils.h"
 #include <algorithm>
 #include "GeometryGenerator.h"
+#include <fstream>
 
 D3DApp::D3DApp()
 {
@@ -70,6 +71,16 @@ bool D3DApp::InitD3D(HWND hWnd)
 	// Set primitive topology to triangle list (groups of 3 vertices)
 	pImmediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
+	D3D11_RASTERIZER_DESC rd = {};
+	ZeroMemory(&rd, sizeof(D3D11_RASTERIZER_DESC));
+	rd.FillMode = D3D11_FILL_SOLID;
+	rd.FrontCounterClockwise = false;
+	rd.DepthClipEnable = true;
+	pDevice->CreateRasterizerState(&rd, &pRasterSolidState);
+
+	rd.FillMode = D3D11_FILL_WIREFRAME;
+	rd.CullMode = D3D11_CULL_NONE;
+	pDevice->CreateRasterizerState(&rd, &pRasterWireFrame);
 
 	// configure viewport
 	vp.Width = 800;
@@ -120,6 +131,12 @@ void D3DApp::UpdateScene(float dt)
 	else if (input->IsKeyPressed('E')) vy = -0.001;
 	else vy = 0.f;
 
+	if (input->IsKeyPressed('P'))
+		currRenderState = true;
+	else if(input->IsKeyPressed('O'))
+		currRenderState = false;
+
+
 	x += vx * dt;
 	y += vy * dt;
 	z += vz * dt;
@@ -149,7 +166,7 @@ void D3DApp::DrawScene()
 	const UINT stride = sizeof(Vertex);
 	const UINT offset = 0u;
 	pImmediateContext->IASetVertexBuffers(0u, 1u, &pVB, &stride, &offset);
-	pImmediateContext->IASetIndexBuffer(pIB, DXGI_FORMAT_R16_UINT, 0u);
+	pImmediateContext->IASetIndexBuffer(pIB, DXGI_FORMAT_R32_UINT, 0u);
 
 	// bind pixel shader
 	pImmediateContext->PSSetShader(pPixelShader, nullptr, 0u);
@@ -160,6 +177,11 @@ void D3DApp::DrawScene()
 
 	// bind vertex layout
 	pImmediateContext->IASetInputLayout(pInputLayout);
+
+	if(currRenderState)
+		pImmediateContext->RSSetState(pRasterWireFrame);
+	else
+		pImmediateContext->RSSetState(pRasterSolidState);
 
 	pImmediateContext->DrawIndexed((UINT)mIndexCount, 0u, 0u);
 }
@@ -184,23 +206,24 @@ void D3DApp::BuildBuffers()
 	using namespace DirectX;
 
 	GeometryGenerator geoGen;
-	GeometryGenerator::MeshData boxMesh;
+	GeometryGenerator::MeshData mesh;
 
 	float width = 2.0f;
 	float height = 2.0f;
 	float depth = 2.0f;
-	//geoGen.CreateBox(width, height, depth, boxMesh);
-	geoGen.CreateSphere(1, 30, 30, boxMesh);
+	geoGen.CreateBox(width, height, depth, mesh);
+	//geoGen.CreateSphere(1, 75, 75, mesh);
+	//geoGen.CreateSkull(mesh);
 
 	D3D11_BUFFER_DESC vbd = {};
 	vbd.Usage = D3D11_USAGE_IMMUTABLE;
-	vbd.ByteWidth = static_cast<UINT>(sizeof(GeometryGenerator::Vertex) * boxMesh.Vertices.size());
+	vbd.ByteWidth = sizeof(Vertex) * mesh.Vertices.size();
 	vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 	vbd.CPUAccessFlags = 0;
 	vbd.MiscFlags = 0;
 
 	D3D11_SUBRESOURCE_DATA vinitData = {};
-	vinitData.pSysMem = boxMesh.Vertices.data();
+	vinitData.pSysMem = mesh.Vertices.data();
 
 	HRESULT hr = pDevice->CreateBuffer(&vbd, &vinitData, &pVB);
 	if (FAILED(hr))
@@ -209,17 +232,18 @@ void D3DApp::BuildBuffers()
 		return;
 	}
 
+	mIndexCount = mesh.Indices.size();
+
 	D3D11_BUFFER_DESC ibd = {};
 	ibd.Usage = D3D11_USAGE_IMMUTABLE;
-	ibd.ByteWidth = static_cast<UINT>(sizeof(UINT) * boxMesh.Indices.size());
+	ibd.ByteWidth = sizeof(UINT) * mIndexCount;
 	ibd.BindFlags = D3D11_BIND_INDEX_BUFFER;
 	ibd.CPUAccessFlags = 0;
 	ibd.MiscFlags = 0;
 
 	D3D11_SUBRESOURCE_DATA iinitData = {};
-	iinitData.pSysMem = boxMesh.Indices.data();
+	iinitData.pSysMem = mesh.Indices.data();
 
-	mIndexCount = boxMesh.Indices.size();
 
 	hr = pDevice->CreateBuffer(&ibd, &iinitData, &pIB);
 	if (FAILED(hr))

@@ -16,6 +16,9 @@
     <Filter Include="Frank D. Luna">
       <UniqueIdentifier>{d2382b01-862b-4df5-bbf0-e2c1df45409f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Models">
+      <UniqueIdentifier>{12af3b6a-05d3-4b04-b8b3-476680ba10aa}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="WinMain.cpp">
@@ -70,5 +73,10 @@
     <FxCompile Include="PixelShader.hlsl">
       <Filter>Resource Files</Filter>
     </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="Models\Skull.txt">
+      <Filter>Models</Filter>
+    </Text>
   </ItemGroup>
 </Project>

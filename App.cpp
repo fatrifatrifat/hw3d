@@ -141,7 +141,7 @@ bool App::InitWin()
 void App::UpdateScene(float dt)
 {
 	d3dApp->UpdateScene(dt);
-
+	
 }
 
 void App::Draw()

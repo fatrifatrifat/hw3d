@@ -1,5 +1,6 @@
 #pragma once
 #include "Utils.h"
+#include <fstream>
 #include <vector>
 #include <DirectXMath.h>
 #include <Windows.h>
@@ -13,19 +14,19 @@ public:
 	{
 		Vertex() {}
 		Vertex(const XMFLOAT3& p, const XMFLOAT4& c)
-			: position(p), color(c) {}
+			: pos(p), color(c) {}
 		Vertex(
 			float px, float py, float pz,
 			float cx, float cy, float cz, float cw)
-			: position(px, py, pz), color(cx, cy, cz, cw) {}
-		XMFLOAT3 position;
+			: pos(px, py, pz), color(cx, cy, cz, cw) {}
+		XMFLOAT3 pos;
 		XMFLOAT4 color;
 	};
 
 	struct MeshData
 	{
 		std::vector<Vertex> Vertices;
-		std::vector<unsigned short> Indices;
+		std::vector<UINT> Indices;
 	};
 
 	void CreateBox(float width, float height, float depth, MeshData& meshData);
@@ -60,6 +61,11 @@ public:
 	/// postprocessing effects.
 	///</summary>
 	void CreateFullscreenQuad(MeshData& meshData);
+
+	///<summary>
+	/// Creates a Skull
+	///</summary>
+	void CreateSkull(MeshData& meshData);
 
 private:
 	void Subdivide(MeshData& meshData);
