@@ -1,4 +1,5 @@
 #include "App.h"
+#include <sstream>
 
 namespace
 {
@@ -141,6 +142,10 @@ bool App::InitWin()
 void App::UpdateScene(float dt)
 {
 	d3dApp->UpdateScene(dt);
+	/*std::stringstream os;
+	os << static_cast<UINT>(1.0f / dt) << '\n';
+	std::string intString = os.str();
+	OutputDebugStringA((LPCSTR)intString.c_str());*/
 	
 }
 

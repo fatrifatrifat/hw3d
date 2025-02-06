@@ -65,7 +65,7 @@ public:
 	///<summary>
 	/// Creates a Skull
 	///</summary>
-	void CreateSkull(MeshData& meshData);
+	void CreateModel(MeshData& meshData, const std::string& fileName);
 
 private:
 	void Subdivide(MeshData& meshData);

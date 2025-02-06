@@ -171,9 +171,9 @@ void GeometryGenerator::CreateGrid(float width, float depth, UINT m, UINT n, Mes
     }
 }
 
-void GeometryGenerator::CreateSkull(MeshData& meshData)
+void GeometryGenerator::CreateModel(MeshData& meshData, const std::string& fileName)
 {
-    std::ifstream fin("Models/Skull.txt");
+    std::ifstream fin(fileName);
 
     if (!fin)
     {

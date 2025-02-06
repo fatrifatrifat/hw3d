@@ -211,9 +211,10 @@ void D3DApp::BuildBuffers()
 	float width = 2.0f;
 	float height = 2.0f;
 	float depth = 2.0f;
-	geoGen.CreateBox(width, height, depth, mesh);
+	//geoGen.CreateBox(width, height, depth, mesh);
 	//geoGen.CreateSphere(1, 75, 75, mesh);
-	//geoGen.CreateSkull(mesh);
+	geoGen.CreateModel(mesh, "Models/Skull.txt");
+	//geoGen.CreateModel(mesh, "Models/Car.txt");
 
 	D3D11_BUFFER_DESC vbd = {};
 	vbd.Usage = D3D11_USAGE_IMMUTABLE;
