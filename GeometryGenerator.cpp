@@ -169,6 +169,38 @@ void GeometryGenerator::CreateGrid(float width, float depth, UINT m, UINT n, Mes
             meshData.Indices.push_back((i + 1) * n + j + 1);
         }
     }
+
+    for (size_t i = 0; i < meshData.Vertices.size(); ++i)
+    {
+        meshData.Vertices[i].pos.y = GetHeight(meshData.Vertices[i].pos.x, meshData.Vertices[i].pos.z);
+
+        // Color the vertex based on its height.
+        if (meshData.Vertices[i].pos.y < -10.0f)
+        {
+            // Sandy beach color.
+            meshData.Vertices[i].color = XMFLOAT4(1.0f, 0.96f, 0.62f, 1.0f);
+        }
+        else if (meshData.Vertices[i].pos.y < 5.0f)
+        {
+            // Light yellow-green.
+            meshData.Vertices[i].color = XMFLOAT4(0.48f, 0.77f, 0.46f, 1.0f);
+        }
+        else if (meshData.Vertices[i].pos.y < 12.0f)
+        {
+            // Dark yellow-green.
+            meshData.Vertices[i].color = XMFLOAT4(0.1f, 0.48f, 0.19f, 1.0f);
+        }
+        else if (meshData.Vertices[i].pos.y < 20.0f)
+        {
+            // Dark brown.
+            meshData.Vertices[i].color = XMFLOAT4(0.45f, 0.39f, 0.34f, 1.0f);
+        }
+        else
+        {
+            // White snow.
+            meshData.Vertices[i].color = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+        }
+    }
 }
 
 void GeometryGenerator::CreateModel(MeshData& meshData, const std::string& fileName)
@@ -196,9 +228,9 @@ void GeometryGenerator::CreateModel(MeshData& meshData, const std::string& fileN
     for (UINT i = 0; i < vcount; ++i)
     {
         fin >> meshData.Vertices[i].pos.x >> meshData.Vertices[i].pos.y >> meshData.Vertices[i].pos.z;
-        meshData.Vertices[i].color = black;
+        meshData.Vertices[i].color = Colors::magenta;
 
-        fin >> nx >> ny >> nz; // Skip normal values
+        fin >> nx >> ny >> nz;
     }
 
     fin >> ignore;
@@ -214,5 +246,10 @@ void GeometryGenerator::CreateModel(MeshData& meshData, const std::string& fileN
     }
 
     fin.close();
+}
+
+float GeometryGenerator::GetHeight(float x, float z) const
+{
+    return 0.3f * (z * sinf(0.1f * x) + x * cosf(0.1f * z));
 }
 

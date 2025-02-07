@@ -68,6 +68,7 @@ public:
 	void CreateModel(MeshData& meshData, const std::string& fileName);
 
 private:
+	float GetHeight(float x, float z) const;
 	void Subdivide(MeshData& meshData);
 	void BuildCylinderTopCap(float bottomRadius, float topRadius, float height, UINT sliceCount, UINT stackCount, MeshData& meshData);
 	void BuildCylinderBottomCap(float bottomRadius, float topRadius, float height, UINT sliceCount, UINT stackCount, MeshData& meshData);

@@ -78,5 +78,8 @@
     <Text Include="Models\Skull.txt">
       <Filter>Models</Filter>
     </Text>
+    <Text Include="Models\Car.txt">
+      <Filter>Models</Filter>
+    </Text>
   </ItemGroup>
 </Project>

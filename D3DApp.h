@@ -44,6 +44,8 @@ public:
 	void BuildShaders();
 	void BuildInputLayout();
 
+	float GetHeight(float x, float z) const;
+
 private:
 	std::unique_ptr<Input> input;
 
@@ -70,6 +72,7 @@ private:
 	ID3D11Buffer* pVB;
 	ID3D11Buffer* pIB;
 	ID3D11Buffer* pCB;
+	ID3D11Buffer* pCBColor;
 
 	ID3D11InputLayout* pInputLayout;
 

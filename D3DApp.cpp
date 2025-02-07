@@ -111,7 +111,7 @@ void D3DApp::Shutdown()
 
 void D3DApp::BeginScene()
 {
-	pImmediateContext->ClearRenderTargetView(pRVT, reinterpret_cast<const float*>(&Colors::blue));
+	pImmediateContext->ClearRenderTargetView(pRVT, reinterpret_cast<const float*>(&Colors::black));
 }
 
 void D3DApp::UpdateScene(float dt)
@@ -158,6 +158,7 @@ void D3DApp::UpdateScene(float dt)
 
 	// Update the constant buffer
 	pImmediateContext->UpdateSubresource(pCB, 0, nullptr, &cb, 0, 0);
+	pImmediateContext->UpdateSubresource(pCBColor, 0, nullptr, &dt, 0, 0);
 }
 
 void D3DApp::DrawScene()
@@ -174,6 +175,7 @@ void D3DApp::DrawScene()
 	// bind vertex shader
 	pImmediateContext->VSSetShader(pVertexShader, nullptr, 0u);
 	pImmediateContext->VSSetConstantBuffers(0u, 1u, &pCB);
+	pImmediateContext->PSSetConstantBuffers(0u, 1u, &pCBColor)
 
 	// bind vertex layout
 	pImmediateContext->IASetInputLayout(pInputLayout);
@@ -211,10 +213,11 @@ void D3DApp::BuildBuffers()
 	float width = 2.0f;
 	float height = 2.0f;
 	float depth = 2.0f;
-	//geoGen.CreateBox(width, height, depth, mesh);
+	geoGen.CreateBox(width, height, depth, mesh);
 	//geoGen.CreateSphere(1, 75, 75, mesh);
-	geoGen.CreateModel(mesh, "Models/Skull.txt");
+	//geoGen.CreateModel(mesh, "Models/Skull.txt");
 	//geoGen.CreateModel(mesh, "Models/Car.txt");
+	//geoGen.CreateGrid(160.0f, 160.0f, 50, 50, mesh);
 
 	D3D11_BUFFER_DESC vbd = {};
 	vbd.Usage = D3D11_USAGE_IMMUTABLE;
@@ -261,6 +264,20 @@ void D3DApp::BuildBuffers()
 	cbd.MiscFlags = 0u;
 
 	hr = pDevice->CreateBuffer(&cbd, nullptr, &pCB);
+	if (FAILED(hr))
+	{
+		MessageBox(0, L"Failed to create constant buffer", 0, 0);
+		return;
+	}
+
+	D3D11_BUFFER_DESC cbd = {};
+	cbd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	cbd.Usage = D3D11_USAGE_DEFAULT;
+	cbd.ByteWidth = sizeof(float);
+	cbd.CPUAccessFlags = 0u;
+	cbd.MiscFlags = 0u;
+
+	hr = pDevice->CreateBuffer(&cbd, nullptr, &pCBColor);
 	if (FAILED(hr))
 	{
 		MessageBox(0, L"Failed to create constant buffer", 0, 0);
