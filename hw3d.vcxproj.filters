@@ -65,6 +65,9 @@
     <ClInclude Include="InputClass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="LightHelper.h">
+      <Filter>Frank D. Luna</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="VertexShader.hlsl">

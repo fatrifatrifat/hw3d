@@ -179,6 +179,7 @@
     <ClInclude Include="D3DApp.h" />
     <ClInclude Include="GameTimer.h" />
     <ClInclude Include="GeometryGenerator.h" />
+    <ClInclude Include="LightHelper.h" />
     <ClInclude Include="InputClass.h" />
     <ClInclude Include="MathHelper.h" />
     <ClInclude Include="Scene.h" />

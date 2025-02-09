@@ -5,6 +5,7 @@
 #include <dxgi.h>
 #include <memory>
 #include "InputClass.h"
+#include "GameTimer.h"
 
 #pragma comment(lib, "d3d11.lib")
 #pragma comment(lib, "D3DCompiler.lib")
@@ -50,6 +51,7 @@ private:
 	std::unique_ptr<Input> input;
 
 	UINT mIndexCount;
+	GameTimer gt;
 
 	float x = 0.f;
 	float y = 0.f;
@@ -72,7 +74,7 @@ private:
 	ID3D11Buffer* pVB;
 	ID3D11Buffer* pIB;
 	ID3D11Buffer* pCB;
-	ID3D11Buffer* pCBColor;
+	ID3D11Buffer* pCBLight;
 
 	ID3D11InputLayout* pInputLayout;
 

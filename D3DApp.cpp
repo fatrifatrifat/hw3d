@@ -72,7 +72,6 @@ bool D3DApp::InitD3D(HWND hWnd)
 	pImmediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 	D3D11_RASTERIZER_DESC rd = {};
-	ZeroMemory(&rd, sizeof(D3D11_RASTERIZER_DESC));
 	rd.FillMode = D3D11_FILL_SOLID;
 	rd.FrontCounterClockwise = false;
 	rd.DepthClipEnable = true;
@@ -90,6 +89,8 @@ bool D3DApp::InitD3D(HWND hWnd)
 	vp.TopLeftX = 0;
 	vp.TopLeftY = 0;
 	pImmediateContext->RSSetViewports(1u, &vp);
+
+	gt.Start();
 
 	return true;
 }
@@ -136,7 +137,6 @@ void D3DApp::UpdateScene(float dt)
 	else if(input->IsKeyPressed('O'))
 		currRenderState = false;
 
-
 	x += vx * dt;
 	y += vy * dt;
 	z += vz * dt;
@@ -145,10 +145,10 @@ void D3DApp::UpdateScene(float dt)
 	XMVECTOR pos = XMVectorSet(x, y, z, 1.0f);
 	XMVECTOR target = XMVectorZero();
 	XMVECTOR up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
-	XMMATRIX view = XMMatrixLookAtLH(pos, target, up);
 
 	// Build the WVP matrix
 	XMMATRIX world = XMLoadFloat4x4(&mWorldMatrix);
+	XMMATRIX view = XMMatrixLookAtLH(pos, target, up);
 	XMMATRIX proj = XMLoadFloat4x4(&mProjectionMatrix);
 	XMMATRIX wvp = world * view * proj;
 
@@ -158,7 +158,6 @@ void D3DApp::UpdateScene(float dt)
 
 	// Update the constant buffer
 	pImmediateContext->UpdateSubresource(pCB, 0, nullptr, &cb, 0, 0);
-	pImmediateContext->UpdateSubresource(pCBColor, 0, nullptr, &dt, 0, 0);
 }
 
 void D3DApp::DrawScene()
@@ -175,7 +174,6 @@ void D3DApp::DrawScene()
 	// bind vertex shader
 	pImmediateContext->VSSetShader(pVertexShader, nullptr, 0u);
 	pImmediateContext->VSSetConstantBuffers(0u, 1u, &pCB);
-	pImmediateContext->PSSetConstantBuffers(0u, 1u, &pCBColor)
 
 	// bind vertex layout
 	pImmediateContext->IASetInputLayout(pInputLayout);
@@ -213,9 +211,9 @@ void D3DApp::BuildBuffers()
 	float width = 2.0f;
 	float height = 2.0f;
 	float depth = 2.0f;
-	geoGen.CreateBox(width, height, depth, mesh);
+	//geoGen.CreateBox(width, height, depth, mesh);
 	//geoGen.CreateSphere(1, 75, 75, mesh);
-	//geoGen.CreateModel(mesh, "Models/Skull.txt");
+	geoGen.CreateModel(mesh, "Models/Skull.txt");
 	//geoGen.CreateModel(mesh, "Models/Car.txt");
 	//geoGen.CreateGrid(160.0f, 160.0f, 50, 50, mesh);
 
@@ -270,19 +268,6 @@ void D3DApp::BuildBuffers()
 		return;
 	}
 
-	D3D11_BUFFER_DESC cbd = {};
-	cbd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	cbd.Usage = D3D11_USAGE_DEFAULT;
-	cbd.ByteWidth = sizeof(float);
-	cbd.CPUAccessFlags = 0u;
-	cbd.MiscFlags = 0u;
-
-	hr = pDevice->CreateBuffer(&cbd, nullptr, &pCBColor);
-	if (FAILED(hr))
-	{
-		MessageBox(0, L"Failed to create constant buffer", 0, 0);
-		return;
-	}
 }
 
 
