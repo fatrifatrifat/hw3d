@@ -2,6 +2,7 @@
 #include <d3d11.h>
 #include <DirectXMath.h>
 #include <d3dcompiler.h>
+#include <wrl\client.h>
 #include <dxgi.h>
 #include <memory>
 #include "InputClass.h"
@@ -9,6 +10,8 @@
 
 #pragma comment(lib, "d3d11.lib")
 #pragma comment(lib, "D3DCompiler.lib")
+
+using namespace Microsoft::WRL;
 
 class D3DApp
 {
@@ -65,8 +68,26 @@ private:
 
 	bool currRenderState = true;
 
+	ComPtr<ID3D11Device> pDevice;
+	ComPtr<ID3D11DeviceContext> pImmediateContext;
+	ComPtr<IDXGISwapChain> pSwapChain;
+	ComPtr<ID3D11RenderTargetView> pRVT;
+	ComPtr<ID3D11DepthStencilView> pDSV;
 
-	ID3D11Device* pDevice;
+	ComPtr<ID3D11RasterizerState> pRasterWireFrame;
+	ComPtr<ID3D11RasterizerState> pRasterSolidState;
+
+	ComPtr<ID3D11Buffer> pVB;
+	ComPtr<ID3D11Buffer> pIB;
+	ComPtr<ID3D11Buffer> pCB;
+	ComPtr<ID3D11Buffer> pCB2;
+	ComPtr<ID3D11InputLayout> pInputLayout;
+	
+	ComPtr<ID3D11VertexShader> pVertexShader;
+	ComPtr<ID3D11PixelShader> pPixelShader;
+	ComPtr<ID3DBlob> pBlob;
+
+	/*ID3D11Device* pDevice;
 	ID3D11DeviceContext* pImmediateContext;
 	IDXGISwapChain* pSwapChain;
 	ID3D11RenderTargetView* pRVT;
@@ -84,7 +105,7 @@ private:
 
 	ID3D11VertexShader* pVertexShader;
 	ID3D11PixelShader* pPixelShader;
-	ID3DBlob* pBlob;
+	ID3DBlob* pBlob;*/
 
 	DirectX::XMFLOAT4X4 mProjectionMatrix;
 	DirectX::XMFLOAT4X4 mWorldMatrixCube1;

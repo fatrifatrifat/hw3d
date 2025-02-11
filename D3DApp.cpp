@@ -6,10 +6,10 @@
 
 D3DApp::D3DApp()
 {
-	pSwapChain = 0;
+	/*pSwapChain = 0;
 	pDevice = 0;
 	pImmediateContext = 0;
-	pRVT = 0;
+	pRVT = 0;*/
 	
 	input = std::make_unique<Input>();
 
@@ -61,21 +61,21 @@ bool D3DApp::InitD3D(HWND hWnd)
 		return false;
 	}
 
-	ID3D11Texture2D* pBackBuffer;
-	pSwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), reinterpret_cast<void**>(&pBackBuffer));
-	pDevice->CreateRenderTargetView(pBackBuffer, 0, &pRVT);
+	ComPtr<ID3D11Resource> pBackBuffer;
+	pSwapChain->GetBuffer(0, __uuidof(ID3D11Resource), &pBackBuffer);
+	pDevice->CreateRenderTargetView(pBackBuffer.Get(), 0, &pRVT);
 	pBackBuffer->Release();
 
 	D3D11_DEPTH_STENCIL_DESC dsd = {};
 	dsd.DepthEnable = true;
 	dsd.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
 	dsd.DepthFunc = D3D11_COMPARISON_LESS;
-	ID3D11DepthStencilState* pDSState;
+	ComPtr<ID3D11DepthStencilState> pDSState;
 	pDevice->CreateDepthStencilState(&dsd, &pDSState);
 
-	pImmediateContext->OMSetDepthStencilState(pDSState, 1u);
+	pImmediateContext->OMSetDepthStencilState(pDSState.Get(), 1u);
 
-	ID3D11Texture2D* pDepthStencil;
+	ComPtr<ID3D11Texture2D> pDepthStencil;
 	D3D11_TEXTURE2D_DESC descDepth = {};
 	descDepth.Width = 800u;
 	descDepth.Height = 600u;
@@ -94,8 +94,8 @@ bool D3DApp::InitD3D(HWND hWnd)
 	ddsv.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
 	ddsv.Texture2D.MipSlice = 0u;
 
-	pDevice->CreateDepthStencilView(pDepthStencil, &ddsv, &pDSV);
-	pImmediateContext->OMSetRenderTargets(1u, &pRVT, pDSV);
+	pDevice->CreateDepthStencilView(pDepthStencil.Get(), &ddsv, &pDSV);
+	pImmediateContext->OMSetRenderTargets(1u, pRVT.GetAddressOf(), pDSV.Get());
 
 	// Set primitive topology to triangle list (groups of 3 vertices)
 	pImmediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -111,6 +111,7 @@ bool D3DApp::InitD3D(HWND hWnd)
 	pDevice->CreateRasterizerState(&rd, &pRasterWireFrame);
 
 	// configure viewport
+	D3D11_VIEWPORT vp;
 	vp.Width = 800;
 	vp.Height = 600;
 	vp.MinDepth = 0;
@@ -141,8 +142,8 @@ void D3DApp::Shutdown()
 
 void D3DApp::BeginScene()
 {
-	pImmediateContext->ClearRenderTargetView(pRVT, reinterpret_cast<const float*>(&Colors::black));
-	pImmediateContext->ClearDepthStencilView(pDSV, D3D11_CLEAR_DEPTH, 1.0f, 0u);
+	pImmediateContext->ClearRenderTargetView(pRVT.Get(), reinterpret_cast<const float*>(&Colors::black));
+	pImmediateContext->ClearDepthStencilView(pDSV.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0u);
 }
 
 void D3DApp::UpdateScene(float dt)
@@ -176,25 +177,21 @@ void D3DApp::UpdateScene(float dt)
 
 
 	// Build the view matrix
-	XMVECTOR pos = XMVectorSet(x, y, -5, 1.0f);
+	XMVECTOR pos = XMVectorSet(x, y, -5.0f, 1.0f);
 	XMVECTOR target = XMVectorZero();
 	XMVECTOR up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
-	XMMATRIX view = XMMatrixLookAtLH(pos, target, up);
-	XMStoreFloat4x4(&mViewMatrix, view);
 
 	// Build the WVP matrix
 	XMMATRIX worldCube1 = XMLoadFloat4x4(&mWorldMatrixCube1);
 	XMMATRIX worldCube2 = XMLoadFloat4x4(&mWorldMatrixCube2);
 
+	XMMATRIX view = XMMatrixLookAtLH(pos, target, up);
+	XMStoreFloat4x4(&mViewMatrix, view);
+
 	XMMATRIX proj = XMLoadFloat4x4(&mProjectionMatrix);
 
 	XMMATRIX wvpCube1 = worldCube1 * view * proj;
 	XMMATRIX wvpCube2 = worldCube2 * view * proj;
-
-	//ConstantBuffer cb;
-
-	//XMStoreFloat4x4(&cb.worldViewProj, XMMatrixTranspose(wvpCube2));
-	//pImmediateContext->UpdateSubresource(pCB, 0, nullptr, &cb, 0, 0);
 
 	struct ConstantBuffer2
 	{
@@ -216,41 +213,41 @@ void D3DApp::UpdateScene(float dt)
 		}
 	};
 
-	pImmediateContext->UpdateSubresource(pCB2, 0, nullptr, &cb2, 0, 0);
+	//pImmediateContext->UpdateSubresource(pCB2, 0, nullptr, &cb2, 0, 0);
 }
 
 void D3DApp::DrawScene()
 {
 	// Bind vertex buffer to pipeline
-	const UINT stride = sizeof(XMFLOAT3);
+	const UINT stride = sizeof(Vertex);
 	const UINT offset = 0u;
-	pImmediateContext->IASetVertexBuffers(0u, 1u, &pVB, &stride, &offset);
-	pImmediateContext->IASetIndexBuffer(pIB, DXGI_FORMAT_R32_UINT, 0u);
+	pImmediateContext->IASetVertexBuffers(0u, 1u, pVB.GetAddressOf(), &stride, &offset);
+	pImmediateContext->IASetIndexBuffer(pIB.Get(), DXGI_FORMAT_R32_UINT, 0u);
 
 	// bind pixel shader
-	pImmediateContext->PSSetShader(pPixelShader, nullptr, 0u);
-	pImmediateContext->PSSetConstantBuffers(0u, 1u, &pCB2);
+	pImmediateContext->PSSetShader(pPixelShader.Get(), nullptr, 0u);
+	//pImmediateContext->PSSetConstantBuffers(0u, 1u, &pCB2);
 
 	// bind vertex shader
-	pImmediateContext->VSSetShader(pVertexShader, nullptr, 0u);
-	pImmediateContext->VSSetConstantBuffers(0u, 1u, &pCB);
+	pImmediateContext->VSSetShader(pVertexShader.Get(), nullptr, 0u);
+	pImmediateContext->VSSetConstantBuffers(0u, 1u, pCB.GetAddressOf());
 
 	// bind vertex layout
-	pImmediateContext->IASetInputLayout(pInputLayout);
+	pImmediateContext->IASetInputLayout(pInputLayout.Get());
 
 	if(currRenderState)
-		pImmediateContext->RSSetState(pRasterWireFrame);
+		pImmediateContext->RSSetState(pRasterWireFrame.Get());
 	else
-		pImmediateContext->RSSetState(pRasterSolidState);
+		pImmediateContext->RSSetState(pRasterSolidState.Get());
 
 	ConstantBuffer cb;
 	XMStoreFloat4x4(&cb.worldViewProj, XMMatrixTranspose(XMLoadFloat4x4(&mWorldMatrixCube1) * XMLoadFloat4x4(&mViewMatrix) * XMLoadFloat4x4(&mProjectionMatrix)));
-	pImmediateContext->UpdateSubresource(pCB, 0, nullptr, &cb, 0, 0);
+	pImmediateContext->UpdateSubresource(pCB.Get(), 0, nullptr, &cb, 0, 0);
 	pImmediateContext->DrawIndexed((UINT)mIndexCount, 0u, 0u);
 
 	// Draw Cube 2 (Rotating Cube)
 	XMStoreFloat4x4(&cb.worldViewProj, XMMatrixTranspose(XMLoadFloat4x4(&mWorldMatrixCube2) * XMMatrixRotationY(cube2Rotation) * XMMatrixTranslation(0, 0, z) * XMLoadFloat4x4(&mViewMatrix) * XMLoadFloat4x4(&mProjectionMatrix)));
-	pImmediateContext->UpdateSubresource(pCB, 0, nullptr, &cb, 0, 0);
+	pImmediateContext->UpdateSubresource(pCB.Get(), 0, nullptr, &cb, 0, 0);
 	pImmediateContext->DrawIndexed((UINT)mIndexCount, 0u, 0u);
 }
 
@@ -261,12 +258,12 @@ void D3DApp::EndScene()
 
 ID3D11Device* D3DApp::GetDevice() const
 {
-	return pDevice;
+	return pDevice.Get();
 }
 
 ID3D11DeviceContext* D3DApp::GetDeviceContext() const
 {
-	return pImmediateContext;
+	return pImmediateContext.Get();
 }
 
 void D3DApp::BuildBuffers()
@@ -281,53 +278,21 @@ void D3DApp::BuildBuffers()
 	float depth = 2.0f;
 	//geoGen.CreateBox(width, height, depth, mesh);
 	//geoGen.CreateSphere(1, 75, 75, mesh);
-	//geoGen.CreateModel(mesh, "Models/Skull.txt");
+	geoGen.CreateModel(mesh, "Models/Skull.txt");
 	//geoGen.CreateModel(mesh, "Models/Car.txt");
 	//geoGen.CreateGrid(160.0f, 160.0f, 50, 50, mesh);
 
-	const XMFLOAT3 vertices[] =
-	{
-		XMFLOAT3(-1.0f, +1.0f, -1.0f),
-		XMFLOAT3(-1.0f, -1.0f, -1.0f),
-		XMFLOAT3(+1.0f, +1.0f, -1.0f),
-		XMFLOAT3(+1.0f, -1.0f, -1.0f),
-		XMFLOAT3(-1.0f, -1.0f, +1.0f),
-		XMFLOAT3(-1.0f, +1.0f, +1.0f),
-		XMFLOAT3(+1.0f, +1.0f, +1.0f),
-		XMFLOAT3(+1.0f, -1.0f, +1.0f)
-	};
-
-	const UINT indices[] = {
-		// Front face
-		0, 2, 1, 2, 3, 1,
-
-		// Back face
-		5, 4, 6, 6, 4, 7,
-
-		// Left face
-		5, 0, 4, 4, 0, 1,
-
-		// Right face
-		2, 6, 3, 3, 6, 7,
-
-		// Top face
-		5, 2, 0, 5, 6, 2,
-
-		// Bottom face
-		1, 3, 4, 4, 3, 7
-	};
-
 	D3D11_BUFFER_DESC vbd = {};
 	vbd.Usage = D3D11_USAGE_IMMUTABLE;
-	//vbd.ByteWidth = sizeof(Vertex) * mesh.Vertices.size();
-	vbd.ByteWidth = sizeof(XMFLOAT3) * 8;
+	vbd.ByteWidth = sizeof(Vertex) * mesh.Vertices.size();
+	//vbd.ByteWidth = sizeof(XMFLOAT3) * 8;
 	vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 	vbd.CPUAccessFlags = 0;
 	vbd.MiscFlags = 0;
 
 	D3D11_SUBRESOURCE_DATA vinitData = {};
-	//vinitData.pSysMem = mesh.Vertices.data();
-	vinitData.pSysMem = vertices;
+	vinitData.pSysMem = mesh.Vertices.data();
+	//vinitData.pSysMem = vertices;
 
 	HRESULT hr = pDevice->CreateBuffer(&vbd, &vinitData, &pVB);
 	if (FAILED(hr))
@@ -336,8 +301,8 @@ void D3DApp::BuildBuffers()
 		return;
 	}
 
-	//mIndexCount = mesh.Indices.size();
-	mIndexCount = 36;
+	mIndexCount = mesh.Indices.size();
+	//mIndexCount = 36;
 
 	D3D11_BUFFER_DESC ibd = {};
 	ibd.Usage = D3D11_USAGE_IMMUTABLE;
@@ -347,8 +312,8 @@ void D3DApp::BuildBuffers()
 	ibd.MiscFlags = 0;
 
 	D3D11_SUBRESOURCE_DATA iinitData = {};
-	//iinitData.pSysMem = mesh.Indices.data();
-	iinitData.pSysMem = indices;
+	iinitData.pSysMem = mesh.Indices.data();
+	//iinitData.pSysMem = indices;
 
 
 	hr = pDevice->CreateBuffer(&ibd, &iinitData, &pIB);
@@ -411,12 +376,12 @@ void D3DApp::BuildBuffers()
 
 void D3DApp::BuildShaders()
 {
-	//D3DReadFileToBlob(L"PixelShader.cso", &pBlob);
-	D3DReadFileToBlob(L"BoxPS.cso", &pBlob);
+	D3DReadFileToBlob(L"PixelShader.cso", pBlob.GetAddressOf());
+	//D3DReadFileToBlob(L"BoxPS.cso", &pBlob);
 	pDevice->CreatePixelShader(pBlob->GetBufferPointer(), pBlob->GetBufferSize(), nullptr, &pPixelShader);
 
-	//D3DReadFileToBlob(L"VertexShader.cso", &pBlob);
-	D3DReadFileToBlob(L"BoxVS.cso", &pBlob);
+	D3DReadFileToBlob(L"VertexShader.cso", pBlob.GetAddressOf());
+	//D3DReadFileToBlob(L"BoxVS.cso", &pBlob);
 	pDevice->CreateVertexShader(pBlob->GetBufferPointer(), pBlob->GetBufferSize(), nullptr, &pVertexShader);
 }
 
@@ -425,7 +390,7 @@ void D3DApp::BuildInputLayout()
 	const D3D11_INPUT_ELEMENT_DESC ied[] =
 	{
 		{ "POSITION",0,DXGI_FORMAT_R32G32B32_FLOAT,0,0,D3D11_INPUT_PER_VERTEX_DATA,0 },
-		//{ "COLOR",0,DXGI_FORMAT_R32G32B32A32_FLOAT,0, 12,D3D11_INPUT_PER_VERTEX_DATA,0 },
+		{ "COLOR",0,DXGI_FORMAT_R32G32B32A32_FLOAT,0, 12,D3D11_INPUT_PER_VERTEX_DATA,0 },
 	};
 	pDevice->CreateInputLayout(
 		ied, (UINT)std::size(ied),
