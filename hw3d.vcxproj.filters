@@ -19,6 +19,9 @@
     <Filter Include="Models">
       <UniqueIdentifier>{12af3b6a-05d3-4b04-b8b3-476680ba10aa}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Resource Files\Box">
+      <UniqueIdentifier>{009ade49-7adf-41b9-8fcf-960caf8a42c5}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="WinMain.cpp">
@@ -75,6 +78,12 @@
     </FxCompile>
     <FxCompile Include="PixelShader.hlsl">
       <Filter>Resource Files</Filter>
+    </FxCompile>
+    <FxCompile Include="BoxVS.hlsl">
+      <Filter>Resource Files\Box</Filter>
+    </FxCompile>
+    <FxCompile Include="BoxPS.hlsl">
+      <Filter>Resource Files\Box</Filter>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>

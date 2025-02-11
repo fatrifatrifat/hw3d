@@ -28,7 +28,7 @@ XMFLOAT3 MathHelper::ComputeNormal(const XMFLOAT3& p0, const XMFLOAT3& p1, const
 	return result;
 }
 
-void MathHelper::TransposeNormal(const XMFLOAT3& normal, const XMFLOAT4X4& worldMatrix)
+void MathHelper::TransposeNormal(XMFLOAT3& normal, const XMFLOAT4X4& worldMatrix)
 {
 	XMVECTOR n = XMLoadFloat3(&normal);
 	XMMATRIX W = XMLoadFloat4x4(&worldMatrix);

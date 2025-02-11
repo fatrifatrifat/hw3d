@@ -61,7 +61,10 @@ private:
 	float vy = 0.f;
 	float vz = 0.f;
 
+	float cube2Rotation = 0.0f;
+
 	bool currRenderState = true;
+
 
 	ID3D11Device* pDevice;
 	ID3D11DeviceContext* pImmediateContext;
@@ -69,12 +72,13 @@ private:
 	ID3D11RenderTargetView* pRVT;
 	ID3D11RasterizerState* pRasterWireFrame;
 	ID3D11RasterizerState* pRasterSolidState;
+	ID3D11DepthStencilView* pDSV;
 	D3D11_VIEWPORT vp;
 
 	ID3D11Buffer* pVB;
 	ID3D11Buffer* pIB;
 	ID3D11Buffer* pCB;
-	ID3D11Buffer* pCBLight;
+	ID3D11Buffer* pCB2;
 
 	ID3D11InputLayout* pInputLayout;
 
@@ -83,7 +87,8 @@ private:
 	ID3DBlob* pBlob;
 
 	DirectX::XMFLOAT4X4 mProjectionMatrix;
-	DirectX::XMFLOAT4X4 mWorldMatrix;
+	DirectX::XMFLOAT4X4 mWorldMatrixCube1;
+	DirectX::XMFLOAT4X4 mWorldMatrixCube2;
 	DirectX::XMFLOAT4X4 mViewMatrix;
 };
 

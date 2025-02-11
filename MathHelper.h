@@ -8,7 +8,7 @@ class MathHelper
 {
 public:
 	XMFLOAT3 ComputeNormal(const XMFLOAT3& p0, const XMFLOAT3& p1, const XMFLOAT3& p2);
-	void TransposeNormal(const XMFLOAT3& normal, const XMFLOAT4X4& worldMatrix);
+	void TransposeNormal(XMFLOAT3& normal, const XMFLOAT4X4& worldMatrix);
 
 
 	static const float Infinity;
