@@ -173,11 +173,15 @@ void D3DApp::UpdateScene(float dt)
 	z += vz * dt;
 
 	if (input->IsKeyPressed('R'))
-		cube2Rotation += 0.001 * dt;
+		roll += 0.001 * dt;
+	if (input->IsKeyPressed('T'))
+		pitch += 0.001 * dt;
+	if (input->IsKeyPressed('Y'))
+		yaw += 0.001 * dt;
 
 
 	// Build the view matrix
-	XMVECTOR pos = XMVectorSet(x, y, -5.0f, 1.0f);
+	XMVECTOR pos = XMVectorSet(x, y, -10.0f, 1.0f);
 	XMVECTOR target = XMVectorZero();
 	XMVECTOR up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
 
@@ -241,12 +245,15 @@ void D3DApp::DrawScene()
 		pImmediateContext->RSSetState(pRasterSolidState.Get());
 
 	ConstantBuffer cb;
-	XMStoreFloat4x4(&cb.worldViewProj, XMMatrixTranspose(XMLoadFloat4x4(&mWorldMatrixCube1) * XMLoadFloat4x4(&mViewMatrix) * XMLoadFloat4x4(&mProjectionMatrix)));
+	/*XMStoreFloat4x4(&cb.worldViewProj, XMMatrixTranspose(XMLoadFloat4x4(&mWorldMatrixCube1) * XMLoadFloat4x4(&mViewMatrix) * XMLoadFloat4x4(&mProjectionMatrix)));
 	pImmediateContext->UpdateSubresource(pCB.Get(), 0, nullptr, &cb, 0, 0);
-	pImmediateContext->DrawIndexed((UINT)mIndexCount, 0u, 0u);
+	pImmediateContext->DrawIndexed((UINT)mIndexCount, 0u, 0u);*/
+
+	XMFLOAT3 rot = { roll, pitch, yaw };
+	XMVECTOR rotation = XMLoadFloat3(&rot);
 
 	// Draw Cube 2 (Rotating Cube)
-	XMStoreFloat4x4(&cb.worldViewProj, XMMatrixTranspose(XMLoadFloat4x4(&mWorldMatrixCube2) * XMMatrixRotationY(cube2Rotation) * XMMatrixTranslation(0, 0, z) * XMLoadFloat4x4(&mViewMatrix) * XMLoadFloat4x4(&mProjectionMatrix)));
+	XMStoreFloat4x4(&cb.worldViewProj, XMMatrixTranspose(XMLoadFloat4x4(&mWorldMatrixCube2) * XMMatrixRotationRollPitchYawFromVector(rotation) * XMMatrixTranslation(0, 0, z) * XMLoadFloat4x4(&mViewMatrix) * XMLoadFloat4x4(&mProjectionMatrix)));
 	pImmediateContext->UpdateSubresource(pCB.Get(), 0, nullptr, &cb, 0, 0);
 	pImmediateContext->DrawIndexed((UINT)mIndexCount, 0u, 0u);
 }
