@@ -11,6 +11,10 @@
 #include "GameTimer.h"
 #include "Utils.h"
 #include "InputClass.h"
+#include "Box.h"
+#include "Skull.h"
+#include "Melon.h"
+#include "Pyramid.h"
 
 class App
 {
@@ -46,22 +50,8 @@ protected:
 
 private:
 	bool keys[256] = { false };
-	float x = 0.f;
-	float y = 0.f;
-	float z = -5.f;
-
-	float vx = 0.f;
-	float vy = 0.f;
-	float vz = 0.f;
-
-	std::vector<std::unique_ptr<Scene>> scenes;
-	std::vector<std::unique_ptr<Scene>>::iterator currScene;
-
-	float mTheta = PI * 1.5f;
-	float mPhi = PI * 0.25f;
-	float mRadius = 5.0f;
-
-	float dTheta = PI * 0.0001f;
-
+	
+	std::vector<std::unique_ptr<class Drawable>> drawables;
+	static constexpr size_t nDrawables = 180;
 };
 

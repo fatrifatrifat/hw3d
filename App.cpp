@@ -49,9 +49,55 @@ void App::InitApp()
 		return;
 	}
 
-	d3dApp->BuildBuffers();
-	d3dApp->BuildShaders();
-	d3dApp->BuildInputLayout();
+	class Factory
+	{
+	public:
+		Factory(D3DApp& d3dApp)
+			:
+			d3dApp(d3dApp)
+		{}
+		std::unique_ptr<Drawable> operator()()
+		{
+			switch (typedist(rng))
+			{
+			case 0:
+				return std::make_unique<Pyramid>(
+					d3dApp, rng, adist, ddist,
+					odist, rdist
+				);
+			case 1:
+				return std::make_unique<Box>(
+					d3dApp, rng, adist, ddist,
+					odist, rdist, bdist
+				);
+			case 2:
+				return std::make_unique<Melon>(
+					d3dApp, rng, adist, ddist,
+					odist, rdist, longdist, latdist
+				);
+			default:
+				assert(false && "bad drawable type in factory");
+				return {};
+			}
+		}
+	private:
+		D3DApp& d3dApp;
+		std::mt19937 rng{ std::random_device{}() };
+		std::uniform_real_distribution<float> adist{ 0.0f,PI * 2.0f };
+		std::uniform_real_distribution<float> ddist{ 0.0f,PI * 0.5f };
+		std::uniform_real_distribution<float> odist{ 0.0f,PI * 0.08f };
+		std::uniform_real_distribution<float> rdist{ 6.0f,20.0f };
+		std::uniform_real_distribution<float> bdist{ 0.4f,3.0f };
+		std::uniform_int_distribution<int> latdist{ 5,20 };
+		std::uniform_int_distribution<int> longdist{ 10,40 };
+		std::uniform_int_distribution<int> typedist{ 0,2 };
+	};
+
+	Factory f(*d3dApp);
+	drawables.reserve(nDrawables);
+	std::generate_n(std::back_inserter(drawables), nDrawables, f);
+
+	d3dApp->SetProjection(DirectX::XMMatrixPerspectiveLH(1.0f, 3.0f / 4.0f, 0.5f, 40.0f));
 }
 
 int App::Go()
@@ -62,7 +108,7 @@ int App::Go()
 		{
 			return *ecode;
 		}
-		UpdateScene(gm.DeltaTime());
+		//UpdateScene(gm.DeltaTime()/10000.f);
 		Draw();
 	}
 
@@ -71,8 +117,6 @@ int App::Go()
 
 void App::Shutdown()
 {
-	d3dApp->Shutdown();
-
 	UnregisterClass(L"D3DWndClassName", hInstance);
 }
 
@@ -141,18 +185,18 @@ bool App::InitWin()
 
 void App::UpdateScene(float dt)
 {
-	d3dApp->UpdateScene(dt);
-	/*std::stringstream os;
-	os << static_cast<UINT>(1.0f / dt) << '\n';
-	std::string intString = os.str();
-	OutputDebugStringA((LPCSTR)intString.c_str());*/
-	
 }
 
 void App::Draw()
 {
+	gm.Start();
 	d3dApp->BeginScene();
-	d3dApp->DrawScene();
+	for (auto& d : drawables)
+	{
+		d->Update(gm.DeltaTime() / 10000.0f);
+		d->Draw(*d3dApp);
+	}
+	//d3dApp->DrawScene();
 	d3dApp->EndScene();
 }
 

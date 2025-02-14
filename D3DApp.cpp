@@ -6,21 +6,16 @@
 
 D3DApp::D3DApp()
 {
-	/*pSwapChain = 0;
-	pDevice = 0;
-	pImmediateContext = 0;
-	pRVT = 0;*/
-	
-	input = std::make_unique<Input>();
+	//input = std::make_unique<Input>();
 
 	using namespace DirectX;
 
 	XMMATRIX I = XMMatrixIdentity();
-	XMStoreFloat4x4(&mWorldMatrixCube1, I);
-	XMStoreFloat4x4(&mWorldMatrixCube2, I);
+	XMStoreFloat4x4(&mWorldMatrix, I);
 
 	XMStoreFloat4x4(&mViewMatrix, I);
 	XMStoreFloat4x4(&mProjectionMatrix, I);
+	
 
 	XMMATRIX P = XMMatrixPerspectiveFovLH(0.25f * PI, 800.f/600.f, 1.0f, 1000.0f);
 	XMStoreFloat4x4(&mProjectionMatrix, P);
@@ -120,24 +115,7 @@ bool D3DApp::InitD3D(HWND hWnd)
 	vp.TopLeftY = 0;
 	pImmediateContext->RSSetViewports(1u, &vp);
 
-	gt.Start();
-
 	return true;
-}
-
-void D3DApp::Shutdown()
-{
-	if (pDevice)
-		pDevice->Release();
-
-	if (pSwapChain)
-		pSwapChain->Release();
-
-	if (pImmediateContext)
-		pImmediateContext->Release();
-
-	if (pRVT)
-		pRVT->Release();
 }
 
 void D3DApp::BeginScene()
@@ -146,116 +124,9 @@ void D3DApp::BeginScene()
 	pImmediateContext->ClearDepthStencilView(pDSV.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0u);
 }
 
-void D3DApp::UpdateScene(float dt)
+void D3DApp::DrawIndexed(UINT count)
 {
-	input->Update();
-	using namespace DirectX;
-
-	if (input->IsKeyPressed('W')) vz = -0.001;
-	else if (input->IsKeyPressed('S')) vz = 0.001;
-	else vz = 0.f;
-
-	if (input->IsKeyPressed('A')) vx = 0.001;
-	else if (input->IsKeyPressed('D')) vx = -0.001;
-	else vx = 0.f;
-
-	if (input->IsKeyPressed('Q')) vy = 0.001;
-	else if (input->IsKeyPressed('E')) vy = -0.001;
-	else vy = 0.f;
-
-	if (input->IsKeyPressed('P'))
-		currRenderState = true;
-	else if(input->IsKeyPressed('O'))
-		currRenderState = false;
-
-	x += vx * dt;
-	y += vy * dt;
-	z += vz * dt;
-
-	if (input->IsKeyPressed('R'))
-		roll += 0.001 * dt;
-	if (input->IsKeyPressed('T'))
-		pitch += 0.001 * dt;
-	if (input->IsKeyPressed('Y'))
-		yaw += 0.001 * dt;
-
-
-	// Build the view matrix
-	XMVECTOR pos = XMVectorSet(x, y, -10.0f, 1.0f);
-	XMVECTOR target = XMVectorZero();
-	XMVECTOR up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
-
-	// Build the WVP matrix
-	XMMATRIX worldCube1 = XMLoadFloat4x4(&mWorldMatrixCube1);
-	XMMATRIX worldCube2 = XMLoadFloat4x4(&mWorldMatrixCube2);
-
-	XMMATRIX view = XMMatrixLookAtLH(pos, target, up);
-	XMStoreFloat4x4(&mViewMatrix, view);
-
-	XMMATRIX proj = XMLoadFloat4x4(&mProjectionMatrix);
-
-	XMMATRIX wvpCube1 = worldCube1 * view * proj;
-	XMMATRIX wvpCube2 = worldCube2 * view * proj;
-
-	struct ConstantBuffer2
-	{
-		struct
-		{
-			XMFLOAT4 color;
-		} face_colors[6];
-	};
-
-	const ConstantBuffer2 cb2 =
-	{
-		{
-			Colors::blue,
-			Colors::red,
-			Colors::green,
-			Colors::yellow,
-			Colors::magenta,
-			Colors::purple
-		}
-	};
-
-	//pImmediateContext->UpdateSubresource(pCB2, 0, nullptr, &cb2, 0, 0);
-}
-
-void D3DApp::DrawScene()
-{
-	// Bind vertex buffer to pipeline
-	const UINT stride = sizeof(Vertex);
-	const UINT offset = 0u;
-	pImmediateContext->IASetVertexBuffers(0u, 1u, pVB.GetAddressOf(), &stride, &offset);
-	pImmediateContext->IASetIndexBuffer(pIB.Get(), DXGI_FORMAT_R32_UINT, 0u);
-
-	// bind pixel shader
-	pImmediateContext->PSSetShader(pPixelShader.Get(), nullptr, 0u);
-	//pImmediateContext->PSSetConstantBuffers(0u, 1u, &pCB2);
-
-	// bind vertex shader
-	pImmediateContext->VSSetShader(pVertexShader.Get(), nullptr, 0u);
-	pImmediateContext->VSSetConstantBuffers(0u, 1u, pCB.GetAddressOf());
-
-	// bind vertex layout
-	pImmediateContext->IASetInputLayout(pInputLayout.Get());
-
-	if(currRenderState)
-		pImmediateContext->RSSetState(pRasterWireFrame.Get());
-	else
-		pImmediateContext->RSSetState(pRasterSolidState.Get());
-
-	ConstantBuffer cb;
-	/*XMStoreFloat4x4(&cb.worldViewProj, XMMatrixTranspose(XMLoadFloat4x4(&mWorldMatrixCube1) * XMLoadFloat4x4(&mViewMatrix) * XMLoadFloat4x4(&mProjectionMatrix)));
-	pImmediateContext->UpdateSubresource(pCB.Get(), 0, nullptr, &cb, 0, 0);
-	pImmediateContext->DrawIndexed((UINT)mIndexCount, 0u, 0u);*/
-
-	XMFLOAT3 rot = { roll, pitch, yaw };
-	XMVECTOR rotation = XMLoadFloat3(&rot);
-
-	// Draw Cube 2 (Rotating Cube)
-	XMStoreFloat4x4(&cb.worldViewProj, XMMatrixTranspose(XMLoadFloat4x4(&mWorldMatrixCube2) * XMMatrixRotationRollPitchYawFromVector(rotation) * XMMatrixTranslation(0, 0, z) * XMLoadFloat4x4(&mViewMatrix) * XMLoadFloat4x4(&mProjectionMatrix)));
-	pImmediateContext->UpdateSubresource(pCB.Get(), 0, nullptr, &cb, 0, 0);
-	pImmediateContext->DrawIndexed((UINT)mIndexCount, 0u, 0u);
+	pImmediateContext->DrawIndexed(count, 0u, 0u);
 }
 
 void D3DApp::EndScene()
@@ -273,136 +144,22 @@ ID3D11DeviceContext* D3DApp::GetDeviceContext() const
 	return pImmediateContext.Get();
 }
 
-void D3DApp::BuildBuffers()
+XMMATRIX D3DApp::GetWorldMatrix() const
 {
-	using namespace DirectX;
-
-	GeometryGenerator geoGen;
-	GeometryGenerator::MeshData mesh;
-
-	float width = 2.0f;
-	float height = 2.0f;
-	float depth = 2.0f;
-	//geoGen.CreateBox(width, height, depth, mesh);
-	//geoGen.CreateSphere(1, 75, 75, mesh);
-	geoGen.CreateModel(mesh, "Models/Skull.txt");
-	//geoGen.CreateModel(mesh, "Models/Car.txt");
-	//geoGen.CreateGrid(160.0f, 160.0f, 50, 50, mesh);
-
-	D3D11_BUFFER_DESC vbd = {};
-	vbd.Usage = D3D11_USAGE_IMMUTABLE;
-	vbd.ByteWidth = sizeof(Vertex) * mesh.Vertices.size();
-	//vbd.ByteWidth = sizeof(XMFLOAT3) * 8;
-	vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	vbd.CPUAccessFlags = 0;
-	vbd.MiscFlags = 0;
-
-	D3D11_SUBRESOURCE_DATA vinitData = {};
-	vinitData.pSysMem = mesh.Vertices.data();
-	//vinitData.pSysMem = vertices;
-
-	HRESULT hr = pDevice->CreateBuffer(&vbd, &vinitData, &pVB);
-	if (FAILED(hr))
-	{
-		MessageBox(0, L"Failed to create vertex buffer", 0, 0);
-		return;
-	}
-
-	mIndexCount = mesh.Indices.size();
-	//mIndexCount = 36;
-
-	D3D11_BUFFER_DESC ibd = {};
-	ibd.Usage = D3D11_USAGE_IMMUTABLE;
-	ibd.ByteWidth = sizeof(UINT) * mIndexCount;
-	ibd.BindFlags = D3D11_BIND_INDEX_BUFFER;
-	ibd.CPUAccessFlags = 0;
-	ibd.MiscFlags = 0;
-
-	D3D11_SUBRESOURCE_DATA iinitData = {};
-	iinitData.pSysMem = mesh.Indices.data();
-	//iinitData.pSysMem = indices;
-
-
-	hr = pDevice->CreateBuffer(&ibd, &iinitData, &pIB);
-	if (FAILED(hr))
-	{
-		MessageBox(0, L"Failed to create index buffer", 0, 0);
-		return;
-	}
-
-	D3D11_BUFFER_DESC cbd = {};
-	cbd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	cbd.Usage = D3D11_USAGE_DEFAULT;
-	cbd.ByteWidth = sizeof(ConstantBuffer);
-	cbd.CPUAccessFlags = 0u;
-	cbd.MiscFlags = 0u;
-
-	hr = pDevice->CreateBuffer(&cbd, nullptr, &pCB);
-	if (FAILED(hr))
-	{
-		MessageBox(0, L"Failed to create constant buffer", 0, 0);
-		return;
-	}
-
-	struct ConstantBuffer2
-	{
-		struct
-		{
-			XMFLOAT4 color;
-		} face_colors[6];
-	};
-
-	const ConstantBuffer2 cb2 =
-	{
-		{
-			Colors::blue,
-			Colors::red,
-			Colors::green,
-			Colors::yellow,
-			Colors::magenta,
-			Colors::purple
-		}
-	};
-
-	D3D11_BUFFER_DESC cbd2 = {};
-	cbd2.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	cbd2.Usage = D3D11_USAGE_DEFAULT;
-	cbd2.ByteWidth = sizeof(ConstantBuffer2);
-	cbd2.CPUAccessFlags = 0u;
-	cbd2.MiscFlags = 0u;
-
-	hr = pDevice->CreateBuffer(&cbd2, nullptr, &pCB2);
-	if (FAILED(hr))
-	{
-		MessageBox(0, L"Failed to create constant buffer 2", 0, 0);
-		return;
-	}
-
+	return XMLoadFloat4x4(&mWorldMatrix);
 }
 
-
-void D3DApp::BuildShaders()
+XMMATRIX D3DApp::GetProjMatrix() const
 {
-	D3DReadFileToBlob(L"PixelShader.cso", pBlob.GetAddressOf());
-	//D3DReadFileToBlob(L"BoxPS.cso", &pBlob);
-	pDevice->CreatePixelShader(pBlob->GetBufferPointer(), pBlob->GetBufferSize(), nullptr, &pPixelShader);
-
-	D3DReadFileToBlob(L"VertexShader.cso", pBlob.GetAddressOf());
-	//D3DReadFileToBlob(L"BoxVS.cso", &pBlob);
-	pDevice->CreateVertexShader(pBlob->GetBufferPointer(), pBlob->GetBufferSize(), nullptr, &pVertexShader);
+	return XMLoadFloat4x4(&mProjectionMatrix);
 }
 
-void D3DApp::BuildInputLayout()
+XMMATRIX D3DApp::GetViewMatrix() const
 {
-	const D3D11_INPUT_ELEMENT_DESC ied[] =
-	{
-		{ "POSITION",0,DXGI_FORMAT_R32G32B32_FLOAT,0,0,D3D11_INPUT_PER_VERTEX_DATA,0 },
-		{ "COLOR",0,DXGI_FORMAT_R32G32B32A32_FLOAT,0, 12,D3D11_INPUT_PER_VERTEX_DATA,0 },
-	};
-	pDevice->CreateInputLayout(
-		ied, (UINT)std::size(ied),
-		pBlob->GetBufferPointer(),
-		pBlob->GetBufferSize(),
-		&pInputLayout
-	);
+	return XMLoadFloat4x4(&mViewMatrix);
+}
+
+void D3DApp::SetProjection(DirectX::FXMMATRIX proj) noexcept
+{
+	XMStoreFloat4x4(&mProjectionMatrix, proj);
 }
