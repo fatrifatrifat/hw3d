@@ -15,6 +15,8 @@
 #include "Skull.h"
 #include "Melon.h"
 #include "Pyramid.h"
+#include "Sheet.h"
+#include "SkinnedBox.h"
 
 class App
 {

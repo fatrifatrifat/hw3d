@@ -1,5 +1,9 @@
 #include "App.h"
+#include "Surface.h"
+#include "GDIPlusManager.h"
 #include <sstream>
+
+GDIPlusManager gdipm;
 
 namespace
 {
@@ -75,6 +79,16 @@ void App::InitApp()
 					d3dApp, rng, adist, ddist,
 					odist, rdist, longdist, latdist
 				);
+			case 3:
+				return std::make_unique<Sheet>(
+					d3dApp, rng, adist, ddist,
+					odist, rdist
+				);
+			case 4:
+				return std::make_unique<SkinnedBox>(
+					d3dApp, rng, adist, ddist,
+					odist, rdist
+				);
 			default:
 				assert(false && "bad drawable type in factory");
 				return {};
@@ -90,7 +104,7 @@ void App::InitApp()
 		std::uniform_real_distribution<float> bdist{ 0.4f,3.0f };
 		std::uniform_int_distribution<int> latdist{ 5,20 };
 		std::uniform_int_distribution<int> longdist{ 10,40 };
-		std::uniform_int_distribution<int> typedist{ 0,2 };
+		std::uniform_int_distribution<int> typedist{ 0,4 };
 	};
 
 	Factory f(*d3dApp);
@@ -108,7 +122,6 @@ int App::Go()
 		{
 			return *ecode;
 		}
-		//UpdateScene(gm.DeltaTime()/10000.f);
 		Draw();
 	}
 
@@ -125,7 +138,7 @@ LRESULT App::WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	switch (msg)
 	{
 	case WM_LBUTTONDOWN:
-		MessageBox(0, L"Hi", 0, 0);
+		MessageBox(0, L"Hacked by Niluz", 0, 0);
 		return 0;
 	case WM_KEYDOWN:
 		if (wParam == VK_ESCAPE)
@@ -169,7 +182,7 @@ bool App::InitWin()
 	int width = R.right - R.left;
 	int height = R.bottom - R.top;
 
-	hMainWnd = CreateWindow(L"D3DWndClassName", L"Rifat Katranci",
+	hMainWnd = CreateWindow(L"D3DWndClassName", L"Muhammed Berkay Katranci",
 		WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, width, height, 0, 0, hInstance, 0);
 	if (!hMainWnd)
 	{
@@ -193,10 +206,9 @@ void App::Draw()
 	d3dApp->BeginScene();
 	for (auto& d : drawables)
 	{
-		d->Update(gm.DeltaTime() / 10000.0f);
+		d->Update(keys['M'] ? 0.0f : gm.DeltaTime() / 3000.0f);
 		d->Draw(*d3dApp);
 	}
-	//d3dApp->DrawScene();
 	d3dApp->EndScene();
 }
 

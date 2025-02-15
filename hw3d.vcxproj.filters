@@ -34,6 +34,9 @@
     <Filter Include="Header Files\Drawable\Models">
       <UniqueIdentifier>{76e1b7d5-e4c2-4c79-88ad-2b9af0d0e6eb}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Images">
+      <UniqueIdentifier>{0d8b6c2e-8e22-41ad-845d-ad9a14da254d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="WinMain.cpp">
@@ -91,6 +94,24 @@
       <Filter>Source Files\Drawable</Filter>
     </ClCompile>
     <ClCompile Include="Pyramid.cpp">
+      <Filter>Source Files\Drawable</Filter>
+    </ClCompile>
+    <ClCompile Include="Surface.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GDIPlusManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Texture.cpp">
+      <Filter>Source Files\Bindable</Filter>
+    </ClCompile>
+    <ClCompile Include="Sampler.cpp">
+      <Filter>Source Files\Bindable</Filter>
+    </ClCompile>
+    <ClCompile Include="Sheet.cpp">
+      <Filter>Source Files\Drawable</Filter>
+    </ClCompile>
+    <ClCompile Include="SkinnedBox.cpp">
       <Filter>Source Files\Drawable</Filter>
     </ClCompile>
   </ItemGroup>
@@ -185,8 +206,26 @@
     <ClInclude Include="Melon.h">
       <Filter>Header Files\Drawable</Filter>
     </ClInclude>
-    <ClInclude Include="Pyramid.h">
+    <ClInclude Include="Surface.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Pyramid.h">
+      <Filter>Header Files\Drawable</Filter>
+    </ClInclude>
+    <ClInclude Include="GDIPlusManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Texture.h">
+      <Filter>Header Files\Bindable</Filter>
+    </ClInclude>
+    <ClInclude Include="Sampler.h">
+      <Filter>Header Files\Bindable</Filter>
+    </ClInclude>
+    <ClInclude Include="Sheet.h">
+      <Filter>Header Files\Drawable</Filter>
+    </ClInclude>
+    <ClInclude Include="SkinnedBox.h">
+      <Filter>Header Files\Drawable\Models</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -208,6 +247,12 @@
     <FxCompile Include="ColorIndexPS.hlsl">
       <Filter>Resource Files</Filter>
     </FxCompile>
+    <FxCompile Include="TextureVS.hlsl">
+      <Filter>Resource Files</Filter>
+    </FxCompile>
+    <FxCompile Include="TexturePS.hlsl">
+      <Filter>Resource Files</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <Text Include="Models\Skull.txt">
@@ -216,5 +261,16 @@
     <Text Include="Models\Car.txt">
       <Filter>Models</Filter>
     </Text>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="Images\cube.png">
+      <Filter>Images</Filter>
+    </Image>
+    <Image Include="Images\DogDuck.png">
+      <Filter>Images</Filter>
+    </Image>
+    <Image Include="Images\kappa50.png">
+      <Filter>Images</Filter>
+    </Image>
   </ItemGroup>
 </Project>
