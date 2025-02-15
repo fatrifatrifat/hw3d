@@ -37,6 +37,9 @@
     <Filter Include="Images">
       <UniqueIdentifier>{0d8b6c2e-8e22-41ad-845d-ad9a14da254d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="imgui">
+      <UniqueIdentifier>{6c7d76f6-f405-452e-90bf-505cb3502ad0}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="WinMain.cpp">
@@ -113,6 +116,24 @@
     </ClCompile>
     <ClCompile Include="SkinnedBox.cpp">
       <Filter>Source Files\Drawable</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui.cpp">
+      <Filter>imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui_demo.cpp">
+      <Filter>imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui_draw.cpp">
+      <Filter>imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui_impl_dx11.cpp">
+      <Filter>imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui_impl_win32.cpp">
+      <Filter>imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui_widgets.cpp">
+      <Filter>imgui</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -226,6 +247,30 @@
     </ClInclude>
     <ClInclude Include="SkinnedBox.h">
       <Filter>Header Files\Drawable\Models</Filter>
+    </ClInclude>
+    <ClInclude Include="imconfig.h">
+      <Filter>imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui.h">
+      <Filter>imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui_impl_dx11.h">
+      <Filter>imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui_impl_win32.h">
+      <Filter>imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui_internal.h">
+      <Filter>imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="imstb_rectpack.h">
+      <Filter>imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="imstb_textedit.h">
+      <Filter>imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="imstb_truetype.h">
+      <Filter>imgui</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
