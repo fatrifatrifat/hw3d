@@ -1,22 +1,20 @@
 #pragma once
-#include <Windows.h>
 #include <algorithm>
 #include <optional>
 #include <cmath>
 #include <vector>
 #include <memory>
 #include "D3DApp.h"
-#include "GeometryGenerator.h"
-#include "Scene.h"
 #include "GameTimer.h"
-#include "Utils.h"
-#include "InputClass.h"
 #include "Box.h"
 #include "Skull.h"
 #include "Melon.h"
 #include "Pyramid.h"
 #include "Sheet.h"
 #include "SkinnedBox.h"
+#include "Camera.h"
+#include "ImguiManager.h"
+#include "imgui\imgui_impl_win32.h"
 
 class App
 {
@@ -55,5 +53,9 @@ private:
 	
 	std::vector<std::unique_ptr<class Drawable>> drawables;
 	static constexpr size_t nDrawables = 180;
+
+	ImguiManager imgui;
+	float speed_factor = 1.0f;
+	Camera cam;
 };
 

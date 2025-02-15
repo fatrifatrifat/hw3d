@@ -1,6 +1,7 @@
 #include "App.h"
 #include "Surface.h"
 #include "GDIPlusManager.h"
+#include "imgui\imgui.h"
 #include <sstream>
 
 GDIPlusManager gdipm;
@@ -112,6 +113,7 @@ void App::InitApp()
 	std::generate_n(std::back_inserter(drawables), nDrawables, f);
 
 	d3dApp->SetProjection(DirectX::XMMatrixPerspectiveLH(1.0f, 3.0f / 4.0f, 0.5f, 40.0f));
+	gm.Start();
 }
 
 int App::Go()
@@ -130,16 +132,17 @@ int App::Go()
 
 void App::Shutdown()
 {
+	ImGui_ImplWin32_Shutdown();
 	UnregisterClass(L"D3DWndClassName", hInstance);
 }
 
 LRESULT App::WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
+	if (ImGui_ImplWin32_WndProcHandler(hwnd, msg, wParam, lParam))
+		return true;
+
 	switch (msg)
 	{
-	case WM_LBUTTONDOWN:
-		MessageBox(0, L"Hacked by Niluz", 0, 0);
-		return 0;
 	case WM_KEYDOWN:
 		if (wParam == VK_ESCAPE)
 			DestroyWindow(hwnd);
@@ -193,6 +196,8 @@ bool App::InitWin()
 	ShowWindow(hMainWnd, SW_SHOW);
 	UpdateWindow(hMainWnd);
 
+	ImGui_ImplWin32_Init(hMainWnd);
+
 	return true;
 }
 
@@ -202,13 +207,25 @@ void App::UpdateScene(float dt)
 
 void App::Draw()
 {
-	gm.Start();
+	float dt = gm.DeltaTime() * speed_factor / 3000.0f;
+
 	d3dApp->BeginScene();
+	d3dApp->SetCamera(cam.GetMatrix());
+
 	for (auto& d : drawables)
 	{
-		d->Update(keys['M'] ? 0.0f : gm.DeltaTime() / 3000.0f);
+		d->Update(keys['M'] ? 0.0f : dt);
 		d->Draw(*d3dApp);
 	}
+
+	if (ImGui::Begin("Simulation Speed"))
+	{
+		ImGui::SliderFloat("Speed Factor", &speed_factor, 0.0f, 40.0f);
+		ImGui::Text("%.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+	}
+	ImGui::End();
+	cam.SpawnControlWindow();
+
 	d3dApp->EndScene();
 }
 

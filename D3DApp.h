@@ -8,7 +8,6 @@
 #include <vector>
 #include <string>
 #include <random>
-#include "InputClass.h"
 #include "GameTimer.h"
 
 #pragma comment(lib, "d3d11.lib")
@@ -35,13 +34,20 @@ public:
 	ID3D11Device* GetDevice() const;
 	ID3D11DeviceContext* GetDeviceContext() const;
 
+	DirectX::XMMATRIX GetCamera() const;
 	DirectX::XMMATRIX GetWorldMatrix() const;
 	DirectX::XMMATRIX GetProjMatrix() const;
 	DirectX::XMMATRIX GetViewMatrix() const;
 
+	void SetCamera(DirectX::FXMMATRIX camera) noexcept;
 	void SetProjection(DirectX::FXMMATRIX proj) noexcept;
 
+	void EnableImgui() noexcept;
+	void DisableImgui() noexcept;
+	bool IsImguiEnabled() const noexcept;
+
 private:
+	bool imguiEnabled = true;
 
 	ComPtr<ID3D11Device> pDevice;
 	ComPtr<ID3D11DeviceContext> pImmediateContext;
@@ -52,8 +58,9 @@ private:
 	ComPtr<ID3D11RasterizerState> pRasterWireFrame;
 	ComPtr<ID3D11RasterizerState> pRasterSolidState;
 
-	DirectX::XMFLOAT4X4 mProjectionMatrix;
+	DirectX::XMFLOAT4X4 mCamera;
 	DirectX::XMFLOAT4X4 mWorldMatrix;
+	DirectX::XMFLOAT4X4 mProjectionMatrix;
 	DirectX::XMFLOAT4X4 mViewMatrix;
 };
 

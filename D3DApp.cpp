@@ -1,7 +1,8 @@
 #include "D3DApp.h"
 #include "Utils.h"
 #include <algorithm>
-#include "GeometryGenerator.h"
+#include "imgui\imgui_impl_dx11.h"
+#include "imgui\imgui_impl_win32.h"
 #include <fstream>
 
 D3DApp::D3DApp()
@@ -23,6 +24,7 @@ D3DApp::D3DApp()
 
 D3DApp::~D3DApp()
 {
+	ImGui_ImplDX11_Shutdown();
 }
 
 bool D3DApp::InitD3D(HWND hWnd)
@@ -107,19 +109,28 @@ bool D3DApp::InitD3D(HWND hWnd)
 
 	// configure viewport
 	D3D11_VIEWPORT vp;
-	vp.Width = 800;
-	vp.Height = 600;
-	vp.MinDepth = 0;
-	vp.MaxDepth = 1;
-	vp.TopLeftX = 0;
-	vp.TopLeftY = 0;
+	vp.Width = 800.0f;
+	vp.Height = 600.0f;
+	vp.MinDepth = 0.0f;
+	vp.MaxDepth = 1.0f;
+	vp.TopLeftX = 0.0f;
+	vp.TopLeftY = 0.0f;
 	pImmediateContext->RSSetViewports(1u, &vp);
+
+	ImGui_ImplDX11_Init(pDevice.Get(), pImmediateContext.Get());
 
 	return true;
 }
 
 void D3DApp::BeginScene()
 {
+	if (imguiEnabled)
+	{
+		ImGui_ImplDX11_NewFrame();
+		ImGui_ImplWin32_NewFrame();
+		ImGui::NewFrame();
+	}
+
 	pImmediateContext->ClearRenderTargetView(pRVT.Get(), reinterpret_cast<const float*>(&Colors::black));
 	pImmediateContext->ClearDepthStencilView(pDSV.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0u);
 }
@@ -131,6 +142,12 @@ void D3DApp::DrawIndexed(UINT count)
 
 void D3DApp::EndScene()
 {
+	if (imguiEnabled)
+	{
+		ImGui::Render();
+		ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
+	}
+
 	pSwapChain->Present(0, 0);
 }
 
@@ -144,22 +161,47 @@ ID3D11DeviceContext* D3DApp::GetDeviceContext() const
 	return pImmediateContext.Get();
 }
 
-XMMATRIX D3DApp::GetWorldMatrix() const
+DirectX::XMMATRIX D3DApp::GetCamera() const
+{
+	return XMLoadFloat4x4(&mCamera);
+}
+
+DirectX::XMMATRIX D3DApp::GetWorldMatrix() const
 {
 	return XMLoadFloat4x4(&mWorldMatrix);
 }
 
-XMMATRIX D3DApp::GetProjMatrix() const
+DirectX::XMMATRIX D3DApp::GetProjMatrix() const
 {
 	return XMLoadFloat4x4(&mProjectionMatrix);
 }
 
-XMMATRIX D3DApp::GetViewMatrix() const
+DirectX::XMMATRIX D3DApp::GetViewMatrix() const
 {
 	return XMLoadFloat4x4(&mViewMatrix);
+}
+
+void D3DApp::SetCamera(DirectX::FXMMATRIX camera) noexcept
+{
+	XMStoreFloat4x4(&mCamera, camera);
 }
 
 void D3DApp::SetProjection(DirectX::FXMMATRIX proj) noexcept
 {
 	XMStoreFloat4x4(&mProjectionMatrix, proj);
+}
+
+void D3DApp::EnableImgui() noexcept
+{
+	imguiEnabled = true;
+}
+
+void D3DApp::DisableImgui() noexcept
+{
+	imguiEnabled = false;
+}
+
+bool D3DApp::IsImguiEnabled() const noexcept
+{
+	return imguiEnabled;
 }

@@ -14,7 +14,7 @@ void TransformCbuf::Bind(D3DApp& d3dApp) noexcept
 {
 	pVcbuf->Update(d3dApp,
 		DirectX::XMMatrixTranspose(
-			parent.GetTransformXM() * d3dApp.GetProjMatrix()
+			parent.GetTransformXM() * d3dApp.GetCamera() * d3dApp.GetProjMatrix()
 		)
 	);
 	pVcbuf->Bind(d3dApp);
