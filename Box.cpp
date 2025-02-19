@@ -27,48 +27,26 @@ Box::Box(D3DApp& d3dApp,
 		struct Vertex
 		{
 			DirectX::XMFLOAT3 pos;
+			DirectX::XMFLOAT3 n;
 		};
 		
-		auto model = Cube::Make<Vertex>();
+		auto model = Cube::MakeIndependent<Vertex>();
+		model.SetNormalsIndependentFlat();
 
 		AddStaticBind(std::make_unique<VertexBuffer>(d3dApp, model.vertices));
 
-		auto pvs = std::make_unique<VertexShader>(d3dApp, L"ColorIndexVS.cso");
+		auto pvs = std::make_unique<VertexShader>(d3dApp, L"PhongVS.cso");
 		auto pvsbc = pvs->GetBytecode();
 		AddStaticBind(std::move(pvs));
 
-		AddStaticBind(std::make_unique<PixelShader>(d3dApp, L"ColorIndexPS.cso"));
+		AddStaticBind(std::make_unique<PixelShader>(d3dApp, L"PhongPS.cso"));
 
 		AddStaticIndexBuffer(std::make_unique<IndexBuffer>(d3dApp, model.indices));
-
-		struct PixelShaderConstants
-		{
-			struct
-			{
-				float r;
-				float g;
-				float b;
-				float a;
-			} face_colors[8];
-		};
-		const PixelShaderConstants cb2 =
-		{
-			{
-				{ 1.0f,1.0f,1.0f },
-				{ 1.0f,0.0f,0.0f },
-				{ 0.0f,1.0f,0.0f },
-				{ 1.0f,1.0f,0.0f },
-				{ 0.0f,0.0f,1.0f },
-				{ 1.0f,0.0f,1.0f },
-				{ 0.0f,1.0f,1.0f },
-				{ 0.0f,0.0f,0.0f },
-			}
-		};
-		AddStaticBind(std::make_unique<PixelConstantBuffer<PixelShaderConstants>>(d3dApp, cb2));
 
 		const std::vector<D3D11_INPUT_ELEMENT_DESC> ied =
 		{
 			{ "Position",0,DXGI_FORMAT_R32G32B32_FLOAT,0,0,D3D11_INPUT_PER_VERTEX_DATA,0 },
+			{ "Normal",0,DXGI_FORMAT_R32G32B32_FLOAT,0,12,D3D11_INPUT_PER_VERTEX_DATA,0 },
 		};
 		AddStaticBind(std::make_unique<InputLayout>(d3dApp, ied, pvsbc));
 

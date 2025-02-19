@@ -43,7 +43,7 @@ Sheet::Sheet(D3DApp& d3dApp,
 		model.vertices[2].tex = { 0.0f,1.0f };
 		model.vertices[3].tex = { 1.0f,1.0f };
 
-		AddStaticBind(std::make_unique<Texture>(d3dApp, Surface::FromFile("Images\\DogDuck.png")));
+		AddStaticBind(std::make_unique<Texture>(d3dApp, Surface::FromFile("Images\\saci.png")));
 
 		AddStaticBind(std::make_unique<VertexBuffer>(d3dApp, model.vertices));
 

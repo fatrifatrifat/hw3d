@@ -12,6 +12,7 @@
 #include "Pyramid.h"
 #include "Sheet.h"
 #include "SkinnedBox.h"
+#include "PointLight.h"
 #include "Camera.h"
 #include "ImguiManager.h"
 #include "imgui\imgui_impl_win32.h"
@@ -57,5 +58,6 @@ private:
 	ImguiManager imgui;
 	float speed_factor = 1.0f;
 	Camera cam;
+	std::unique_ptr<PointLight> light;
 };
 
