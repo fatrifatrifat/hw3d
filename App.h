@@ -54,7 +54,7 @@ private:
 	bool keys[256] = { false };
 	
 	std::vector<std::unique_ptr<class Drawable>> drawables;
-	static constexpr size_t nDrawables = 150;
+	static constexpr size_t nDrawables = 400;
 
 	ImguiManager imgui;
 	float speed_factor = 1.0f;

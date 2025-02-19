@@ -257,9 +257,6 @@
     <ClInclude Include="Sheet.h">
       <Filter>Header Files\Drawable</Filter>
     </ClInclude>
-    <ClInclude Include="SkinnedBox.h">
-      <Filter>Header Files\Drawable\Models</Filter>
-    </ClInclude>
     <ClInclude Include="ImguiManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -305,6 +302,9 @@
     <ClInclude Include="Cylinder.h">
       <Filter>Header Files\Drawable</Filter>
     </ClInclude>
+    <ClInclude Include="SkinnedBox.h">
+      <Filter>Header Files\Drawable</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="VertexShader.hlsl">
@@ -344,6 +344,18 @@
       <Filter>Resource Files</Filter>
     </FxCompile>
     <FxCompile Include="IndexedPhongPS.hlsl">
+      <Filter>Resource Files</Filter>
+    </FxCompile>
+    <FxCompile Include="BlendedPhongVS.hlsl">
+      <Filter>Resource Files</Filter>
+    </FxCompile>
+    <FxCompile Include="BlendedPhongPS.hlsl">
+      <Filter>Resource Files</Filter>
+    </FxCompile>
+    <FxCompile Include="TexturedPhongVS.hlsl">
+      <Filter>Resource Files</Filter>
+    </FxCompile>
+    <FxCompile Include="TexturedPhongPS.hlsl">
       <Filter>Resource Files</Filter>
     </FxCompile>
   </ItemGroup>

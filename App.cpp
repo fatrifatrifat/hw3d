@@ -79,6 +79,16 @@ void App::InitApp()
 					d3dApp, rng, adist, ddist, odist,
 					rdist, bdist, tdist
 				);
+			case 2:
+				return std::make_unique<Pyramid>(
+					d3dApp, rng, adist, ddist, odist,
+					rdist, tdist
+				);
+			case 3:
+				return std::make_unique<SkinnedBox>(
+					d3dApp, rng, adist, ddist, odist,
+					rdist
+				);
 			default:
 				assert(false && "impossible drawable option in factory");
 				return {};
@@ -87,7 +97,7 @@ void App::InitApp()
 	private:
 		D3DApp& d3dApp;
 		std::mt19937 rng{ std::random_device{}() };
-		std::uniform_int_distribution<int> sdist{ 0,1 };
+		std::uniform_int_distribution<int> sdist{ 0,3 };
 		std::uniform_real_distribution<float> adist{ 0.0f,PI * 2.0f };
 		std::uniform_real_distribution<float> ddist{ 0.0f,PI * 0.5f };
 		std::uniform_real_distribution<float> odist{ 0.0f,PI * 0.08f };
