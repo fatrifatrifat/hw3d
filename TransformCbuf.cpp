@@ -1,24 +1,23 @@
 #include "TransformCbuf.h"
 
-TransformCbuf::TransformCbuf(D3DApp& d3dApp, const Drawable& parent)
+TransformCbuf::TransformCbuf(D3DApp& d3dApp, const Drawable& parent, UINT slot)
 	:
 	parent(parent)
 {
 	if (!pVcbuf)
 	{
-		pVcbuf = std::make_unique<VertexConstantBuffer<Transforms>>(d3dApp);
+		pVcbuf = std::make_unique<VertexConstantBuffer<Transforms>>(d3dApp, slot);
 	}
 }
 
 void TransformCbuf::Bind(D3DApp& d3dApp) noexcept
 {
-	const auto model = parent.GetTransformXM();
+	const auto modelView = parent.GetTransformXM() * d3dApp.GetCamera();
 	const Transforms tf =
 	{
-		DirectX::XMMatrixTranspose(model),
+		DirectX::XMMatrixTranspose(modelView),
 		DirectX::XMMatrixTranspose(
-			model *
-			d3dApp.GetCamera() *
+			modelView *
 			d3dApp.GetProjMatrix()
 		)
 	};

@@ -13,7 +13,7 @@ private:
 	};
 
 public:
-	TransformCbuf(D3DApp& d3dApp, const Drawable& parent);
+	TransformCbuf(D3DApp& d3dApp, const Drawable& parent, UINT slot = 0u);
 	void Bind(D3DApp& d3dApp) noexcept override;
 private:
 	static std::unique_ptr<VertexConstantBuffer<Transforms>> pVcbuf;

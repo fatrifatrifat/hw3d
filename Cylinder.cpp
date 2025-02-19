@@ -1,28 +1,27 @@
-#include "Box.h"
+#include "Cylinder.h"
+#include "Prism.h"
 #include "BindableBase.h"
-#include "Sphere.h"
-#include "Cube.h"
 
-Box::Box(D3DApp& d3dApp,
-	std::mt19937& rng,
+Cylinder::Cylinder(D3DApp& d3dApp, std::mt19937& rng,
 	std::uniform_real_distribution<float>& adist,
 	std::uniform_real_distribution<float>& ddist,
 	std::uniform_real_distribution<float>& odist,
 	std::uniform_real_distribution<float>& rdist,
 	std::uniform_real_distribution<float>& bdist,
-	DirectX::XMFLOAT3 material)
-	: TestObject(d3dApp, rng, adist, ddist, odist, rdist)
+	std::uniform_int_distribution<int>& tdist)
+	:
+	TestObject(d3dApp, rng, adist, ddist, odist, rdist)
 {
+	namespace dx = DirectX;
+
 	if (!IsStaticInitialized())
 	{
 		struct Vertex
 		{
-			DirectX::XMFLOAT3 pos;
-			DirectX::XMFLOAT3 n;
+			dx::XMFLOAT3 pos;
+			dx::XMFLOAT3 n;
 		};
-		
-		auto model = Cube::MakeIndependent<Vertex>();
-		model.SetNormalsIndependentFlat();
+		auto model = Prism::MakeTesselatedIndependentCapNormals<Vertex>(tdist(rng));
 
 		AddStaticBind(std::make_unique<VertexBuffer>(d3dApp, model.vertices));
 
@@ -30,7 +29,7 @@ Box::Box(D3DApp& d3dApp,
 		auto pvsbc = pvs->GetBytecode();
 		AddStaticBind(std::move(pvs));
 
-		AddStaticBind(std::make_unique<PixelShader>(d3dApp, L"PhongPS.cso"));
+		AddStaticBind(std::make_unique<PixelShader>(d3dApp, L"IndexedPhongPS.cso"));
 
 		AddStaticIndexBuffer(std::make_unique<IndexBuffer>(d3dApp, model.indices));
 
@@ -42,6 +41,21 @@ Box::Box(D3DApp& d3dApp,
 		AddStaticBind(std::make_unique<InputLayout>(d3dApp, ied, pvsbc));
 
 		AddStaticBind(std::make_unique<Topology>(d3dApp, D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST));
+
+		struct PSMaterialConstant
+		{
+			dx::XMFLOAT3A colors[6] = {
+				{1.0f,0.0f,0.0f},
+				{0.0f,1.0f,0.0f},
+				{0.0f,0.0f,1.0f},
+				{1.0f,1.0f,0.0f},
+				{1.0f,0.0f,1.0f},
+				{0.0f,1.0f,1.0f},
+			};
+			float specularIntensity = 0.6f;
+			float specularPower = 30.0f;
+		} matConst;
+		AddStaticBind(std::make_unique<PixelConstantBuffer<PSMaterialConstant>>(d3dApp, matConst, 1u));
 	}
 	else
 	{
@@ -49,22 +63,4 @@ Box::Box(D3DApp& d3dApp,
 	}
 
 	AddBind(std::make_unique<TransformCbuf>(d3dApp, *this));
-
-	struct PSMaterialConstant
-	{
-		DirectX::XMFLOAT3 color;
-		float specularIntensity = 0.6f;
-		float specularPower = 30.0f;
-		float padding[3];
-	} colorConst;
-	colorConst.color = material;
-	AddBind(std::make_unique<PixelConstantBuffer<PSMaterialConstant>>(d3dApp, colorConst, 1u));
-
-	DirectX::XMStoreFloat3x3(&mt, DirectX::XMMatrixScaling(1.0f, 1.0f, bdist(rng)));
-}
-
-DirectX::XMMATRIX Box::GetTransformXM() const noexcept
-{
-	namespace dx = DirectX;
-	return dx::XMLoadFloat3x3(&mt) * TestObject::GetTransformXM();
 }

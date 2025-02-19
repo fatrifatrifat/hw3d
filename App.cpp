@@ -65,22 +65,36 @@ void App::InitApp()
 		{}
 		std::unique_ptr<Drawable> operator()()
 		{
-			return std::make_unique<Box>(
-				d3dApp, rng, adist, ddist,
-				odist, rdist, bdist
-			);
+			const DirectX::XMFLOAT3 mat = { cdist(rng),cdist(rng),cdist(rng) };
+
+			switch (sdist(rng))
+			{
+			case 0:
+				return std::make_unique<Box>(
+					d3dApp, rng, adist, ddist,
+					odist, rdist, bdist, mat
+				);
+			case 1:
+				return std::make_unique<Cylinder>(
+					d3dApp, rng, adist, ddist, odist,
+					rdist, bdist, tdist
+				);
+			default:
+				assert(false && "impossible drawable option in factory");
+				return {};
+			}
 		}
 	private:
 		D3DApp& d3dApp;
 		std::mt19937 rng{ std::random_device{}() };
+		std::uniform_int_distribution<int> sdist{ 0,1 };
 		std::uniform_real_distribution<float> adist{ 0.0f,PI * 2.0f };
 		std::uniform_real_distribution<float> ddist{ 0.0f,PI * 0.5f };
 		std::uniform_real_distribution<float> odist{ 0.0f,PI * 0.08f };
 		std::uniform_real_distribution<float> rdist{ 6.0f,20.0f };
 		std::uniform_real_distribution<float> bdist{ 0.4f,3.0f };
-		std::uniform_int_distribution<int> latdist{ 5,20 };
-		std::uniform_int_distribution<int> longdist{ 10,40 };
-		std::uniform_int_distribution<int> typedist{ 0,3 };
+		std::uniform_real_distribution<float> cdist{ 0.0f,1.0f };
+		std::uniform_int_distribution<int> tdist{ 3,30 };
 	};
 
 	Factory f(*d3dApp);
@@ -187,7 +201,7 @@ void App::Draw()
 
 	d3dApp->BeginScene();
 	d3dApp->SetCamera(cam.GetMatrix());
-	light->Bind(*d3dApp);
+	light->Bind(*d3dApp, cam.GetMatrix());
 
 	for (auto& d : drawables)
 	{

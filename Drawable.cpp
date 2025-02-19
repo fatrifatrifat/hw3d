@@ -1,7 +1,6 @@
 #include "Drawable.h"
 #include "IndexBuffer.h"
 #include <cassert>
-#include <typeinfo>
 
 void Drawable::Draw(D3DApp& d3dApp) const noexcept
 {
