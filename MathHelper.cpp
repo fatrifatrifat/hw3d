@@ -8,6 +8,7 @@
 
 const float MathHelper::Infinity = FLT_MAX;
 const float MathHelper::Pi = 3.1415926535f;
+const double MathHelper::PiD = 3.1415926535;
 
 XMFLOAT3 MathHelper::ComputeNormal(const XMFLOAT3& p0, const XMFLOAT3& p1, const XMFLOAT3& p2)
 {

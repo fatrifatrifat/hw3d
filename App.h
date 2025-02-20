@@ -4,6 +4,7 @@
 #include <cmath>
 #include <vector>
 #include <memory>
+#include <set>
 #include "D3DApp.h"
 #include "GameTimer.h"
 #include "Box.h"
@@ -41,6 +42,10 @@ protected:
 	virtual void UpdateScene(float dt);
 	virtual void Draw();
 
+	void SpawnSimulationWindow() noexcept;
+	void SpawnBoxWindowManagerWindow() noexcept;
+	void SpawnBoxWindows() noexcept;
+
 	static std::optional<int> ProcessMessage();
 
 protected:
@@ -54,11 +59,13 @@ private:
 	bool keys[256] = { false };
 	
 	std::vector<std::unique_ptr<class Drawable>> drawables;
-	static constexpr size_t nDrawables = 400;
+	std::vector<class Box*> boxes;
+	static constexpr size_t nDrawables = 30;
 
 	ImguiManager imgui;
 	float speed_factor = 1.0f;
 	Camera cam;
 	std::unique_ptr<PointLight> light;
+	std::optional<int> comboBoxIndex;
+	std::set<int> boxControlIds;
 };
-

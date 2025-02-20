@@ -2,6 +2,7 @@
 #include "BindableBase.h"
 #include "Sphere.h"
 #include "Cube.h"
+#include "imgui\imgui.h"
 
 Box::Box(D3DApp& d3dApp,
 	std::mt19937& rng,
@@ -50,15 +51,8 @@ Box::Box(D3DApp& d3dApp,
 
 	AddBind(std::make_unique<TransformCbuf>(d3dApp, *this));
 
-	struct PSMaterialConstant
-	{
-		DirectX::XMFLOAT3 color;
-		float specularIntensity = 0.6f;
-		float specularPower = 30.0f;
-		float padding[3];
-	} colorConst;
-	colorConst.color = material;
-	AddBind(std::make_unique<PixelConstantBuffer<PSMaterialConstant>>(d3dApp, colorConst, 1u));
+	materialConstants.color = material;
+	AddBind(std::make_unique<PixelConstantBuffer<PSMaterialConstant>>(d3dApp, materialConstants, 1u));
 
 	DirectX::XMStoreFloat3x3(&mt, DirectX::XMMatrixScaling(1.0f, 1.0f, bdist(rng)));
 }
@@ -67,4 +61,44 @@ DirectX::XMMATRIX Box::GetTransformXM() const noexcept
 {
 	namespace dx = DirectX;
 	return dx::XMLoadFloat3x3(&mt) * TestObject::GetTransformXM();
+}
+
+bool Box::SpawnControlWindow(int id, D3DApp& d3dApp) noexcept
+{
+	using namespace std::string_literals;
+
+	bool dirty = false;
+	bool open = true;
+	if (ImGui::Begin(("Box "s + std::to_string(id)).c_str(), &open))
+	{
+		ImGui::Text("Material Properties");
+		const auto cd = ImGui::ColorEdit3("Material Color", &materialConstants.color.x);
+		const auto sid = ImGui::SliderFloat("Specular Intensity", &materialConstants.specularIntensity, 0.05f, 4.0f, "%.2f", 2);
+		const auto spd = ImGui::SliderFloat("Specular Power", &materialConstants.specularPower, 1.0f, 200.0f, "%.2f", 2);
+		dirty = cd || sid || spd;
+
+		ImGui::Text("Position");
+		ImGui::SliderFloat("R", &r, 0.0f, 80.0f, "%.1f");
+		ImGui::SliderAngle("Theta", &theta, -180.0f, 180.0f);
+		ImGui::SliderAngle("Phi", &phi, -180.0f, 180.0f);
+		ImGui::Text("Orientation");
+		ImGui::SliderAngle("Roll", &roll, -180.0f, 180.0f);
+		ImGui::SliderAngle("Pitch", &pitch, -180.0f, 180.0f);
+		ImGui::SliderAngle("Yaw", &yaw, -180.0f, 180.0f);
+	}
+	ImGui::End();
+
+	if (dirty)
+	{
+		SyncMaterial(d3dApp);
+	}
+
+	return open;
+}
+
+void Box::SyncMaterial(D3DApp& d3dApp) noexcept
+{
+	auto pConstPS = QueryBindable<MaterialCbuf>();
+	assert(pConstPS != nullptr);
+	pConstPS->Update(d3dApp, materialConstants);
 }

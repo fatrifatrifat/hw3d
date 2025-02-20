@@ -16,6 +16,16 @@ public:
 		return x * x;
 	}
 
+	template<typename T>
+	static constexpr T wrap_angle(T theta)
+	{
+		const T modded = fmod(theta, (T)2.0 * (T)PiD);
+		return (modded > (T)PiD) ?
+			(modded - (T)2.0 * (T)PiD) :
+			modded;
+	}
+
 	static const float Infinity;
 	static const float Pi;
+	static const double PiD;
 };

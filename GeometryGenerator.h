@@ -13,14 +13,14 @@ public:
 	struct Vertex
 	{
 		Vertex() {}
-		Vertex(const XMFLOAT3& p, const XMFLOAT4& c)
-			: pos(p), color(c) {}
+		Vertex(const XMFLOAT3& p, const XMFLOAT3& n)
+			: pos(p), normal(n) {}
 		Vertex(
 			float px, float py, float pz,
-			float cx, float cy, float cz, float cw)
-			: pos(px, py, pz), color(cx, cy, cz, cw) {}
+			float nx, float ny, float nz)
+			: pos(px, py, pz), normal(nx, ny, nz) {}
 		XMFLOAT3 pos;
-		XMFLOAT4 color;
+		XMFLOAT3 normal;
 	};
 
 	struct MeshData

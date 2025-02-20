@@ -3,20 +3,12 @@
 
 Skull::Skull(D3DApp& d3dApp,
 	std::mt19937& rng,
-	std::uniform_real_distribution<float>& rdist,
 	std::uniform_real_distribution<float>& adist,
 	std::uniform_real_distribution<float>& ddist,
-	std::uniform_real_distribution<float>& odist)
-	: r(rdist(rng)),
-	droll(ddist(rng)),
-	dpitch(ddist(rng)),
-	dyaw(ddist(rng)),
-	dphi(odist(rng)),
-	dtheta(odist(rng)),
-	dchi(odist(rng)),
-	chi(adist(rng)),
-	theta(adist(rng)),
-	phi(adist(rng))
+	std::uniform_real_distribution<float>& odist,
+	std::uniform_real_distribution<float>& rdist,
+	DirectX::XMFLOAT3 material)
+	: TestObject(d3dApp, rng, adist, ddist, odist, rdist)
 {
 	if (!IsStaticInitialized())
 	{
@@ -28,19 +20,19 @@ Skull::Skull(D3DApp& d3dApp,
 		const std::vector<GeometryGenerator::Vertex> vertices = mesh.Vertices;
 		AddStaticBind(std::make_unique<VertexBuffer>(d3dApp, vertices));
 
-		auto pvs = std::make_unique<VertexShader>(d3dApp, L"VertexShader.cso");
+		auto pvs = std::make_unique<VertexShader>(d3dApp, L"PhongVS.cso");
 		auto pvsbc = pvs->GetBytecode();
 		AddStaticBind(std::move(pvs));
 
-		AddStaticBind(std::make_unique<PixelShader>(d3dApp, L"PixelShader.cso"));
+		AddStaticBind(std::make_unique<PixelShader>(d3dApp, L"PhongPS.cso"));
 
 		const std::vector<UINT> indices = mesh.Indices;
 		AddStaticIndexBuffer(std::make_unique<IndexBuffer>(d3dApp, indices));
 
 		const std::vector<D3D11_INPUT_ELEMENT_DESC> ied =
 		{
-			{ "POSITION",0,DXGI_FORMAT_R32G32B32_FLOAT,0,0,D3D11_INPUT_PER_VERTEX_DATA,0 },
-			{ "COLOR",0,DXGI_FORMAT_R32G32B32A32_FLOAT,0,12,D3D11_INPUT_PER_VERTEX_DATA,0 },
+			{ "Position",0,DXGI_FORMAT_R32G32B32_FLOAT,0,0,D3D11_INPUT_PER_VERTEX_DATA,0 },
+			{ "Normal",0,DXGI_FORMAT_R32G32B32A32_FLOAT,0,12,D3D11_INPUT_PER_VERTEX_DATA,0 },
 		};
 		AddStaticBind(std::make_unique<InputLayout>(d3dApp, ied, pvsbc));
 
@@ -52,21 +44,16 @@ Skull::Skull(D3DApp& d3dApp,
 	}
 
 	AddBind(std::make_unique<TransformCbuf>(d3dApp, *this));
-}
 
-void Skull::Update(float dt) noexcept
-{
-	roll += droll * dt;
-	pitch += dpitch * dt;
-	yaw += dyaw * dt;
-	theta += dtheta * dt;
-	phi += dphi * dt;
-	chi += dchi * dt;
+	colorConst.material = material;
+	AddBind(std::make_unique<PixelConstantBuffer<PSMaterialConstant>>(d3dApp, colorConst, 1u));
+
+
+	DirectX::XMStoreFloat3x3(&mt, DirectX::XMMatrixScaling(0.7f, 0.7f, 0.7f));
 }
 
 DirectX::XMMATRIX Skull::GetTransformXM() const noexcept
 {
-	return DirectX::XMMatrixRotationRollPitchYaw(pitch, yaw, roll) *
-		DirectX::XMMatrixTranslation(r, 0.0f, 0.0f) *
-		DirectX::XMMatrixRotationRollPitchYaw(theta, phi, chi);
+	namespace dx = DirectX;
+	return dx::XMLoadFloat3x3(&mt) * TestObject::GetTransformXM();
 }
