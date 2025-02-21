@@ -16,6 +16,7 @@
 #include "PointLight.h"
 #include "Cylinder.h"
 #include "Camera.h"
+#include "AssTest.h"
 #include "ImguiManager.h"
 #include "imgui\imgui_impl_win32.h"
 
@@ -60,7 +61,7 @@ private:
 	
 	std::vector<std::unique_ptr<class Drawable>> drawables;
 	std::vector<class Box*> boxes;
-	static constexpr size_t nDrawables = 30;
+	static constexpr size_t nDrawables = 1;
 
 	ImguiManager imgui;
 	float speed_factor = 1.0f;

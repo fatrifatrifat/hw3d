@@ -2,6 +2,9 @@
 #include "Surface.h"
 #include "GDIPlusManager.h"
 #include "imgui\imgui.h"
+#include <assimp\Importer.hpp>
+#include <assimp\scene.h>
+#include <assimp\postprocess.h>
 #include <sstream>
 
 GDIPlusManager gdipm;
@@ -56,6 +59,12 @@ void App::InitApp()
 
 	light = std::make_unique<PointLight>(*d3dApp);
 
+	Assimp::Importer imp;
+	auto model = imp.ReadFile("Models\\OBJ\\suzanne.obj",
+		aiProcess_Triangulate |
+		aiProcess_JoinIdenticalVertices
+	);
+
 	class Factory
 	{
 	public:
@@ -67,7 +76,12 @@ void App::InitApp()
 		{
 			const DirectX::XMFLOAT3 mat = { cdist(rng),cdist(rng),cdist(rng) };
 
-			switch (sdist(rng))
+			return std::make_unique<AssTest>(
+				d3dApp, rng, adist, ddist, odist,
+				rdist, mat, 1.5f
+			);
+
+			/*switch (sdist(rng))
 			{
 			case 0:
 				return std::make_unique<Box>(
@@ -97,7 +111,7 @@ void App::InitApp()
 			default:
 				assert(false && "impossible drawable option in factory");
 				return {};
-			}
+			}*/
 		}
 	private:
 		D3DApp& d3dApp;
