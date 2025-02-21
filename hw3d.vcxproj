@@ -264,6 +264,7 @@
     <ClInclude Include="Topology.h" />
     <ClInclude Include="TransformCbuf.h" />
     <ClInclude Include="Utils.h" />
+    <ClInclude Include="Vertex.h" />
     <ClInclude Include="VertexBuffer.h" />
     <ClInclude Include="VertexShader.h" />
   </ItemGroup>
