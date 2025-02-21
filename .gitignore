@@ -76,7 +76,7 @@ StyleCopReport.xml
 *.ilk
 *.meta
 *.obj
-!hw3d/Models/*.obj
+!Models/*.obj
 *.iobj
 *.pch
 *.pdb
