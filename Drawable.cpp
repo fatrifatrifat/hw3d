@@ -2,7 +2,9 @@
 #include "IndexBuffer.h"
 #include <cassert>
 
-void Drawable::Draw(D3DApp& d3dApp) const noexcept
+using namespace Bind;
+
+void Drawable::Draw(D3DApp& d3dApp) const
 {
 	for (auto& b : binds)
 	{
@@ -15,13 +17,13 @@ void Drawable::Draw(D3DApp& d3dApp) const noexcept
 	d3dApp.DrawIndexed(pIndexBuffer->GetCount());
 }
 
-void Drawable::AddBind(std::unique_ptr<Bindable> bind) noexcept
+void Drawable::AddBind(std::unique_ptr<Bind::Bindable> bind)
 {
 	assert("*Must* use AddIndexBuffer to bind index buffer" && typeid(*bind) != typeid(IndexBuffer));
 	binds.push_back(std::move(bind));
 }
 
-void Drawable::AddIndexBuffer(std::unique_ptr<IndexBuffer> ibuf) noexcept
+void Drawable::AddIndexBuffer(std::unique_ptr<IndexBuffer> ibuf)
 {
 	assert("Attempting to add index buffer a second time" && pIndexBuffer == nullptr);
 	pIndexBuffer = ibuf.get();

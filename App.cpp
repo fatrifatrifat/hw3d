@@ -58,85 +58,7 @@ void App::InitApp()
 	}
 
 	light = std::make_unique<PointLight>(*d3dApp);
-
-	Assimp::Importer imp;
-	auto model = imp.ReadFile("Models\\OBJ\\suzanne.obj",
-		aiProcess_Triangulate |
-		aiProcess_JoinIdenticalVertices
-	);
-
-	class Factory
-	{
-	public:
-		Factory(D3DApp& d3dApp)
-			:
-			d3dApp(d3dApp)
-		{}
-		std::unique_ptr<Drawable> operator()()
-		{
-			const DirectX::XMFLOAT3 mat = { cdist(rng),cdist(rng),cdist(rng) };
-
-			return std::make_unique<AssTest>(
-				d3dApp, rng, adist, ddist, odist,
-				rdist, mat, 1.5f
-			);
-
-			/*switch (sdist(rng))
-			{
-			case 0:
-				return std::make_unique<Box>(
-					d3dApp, rng, adist, ddist,
-					odist, rdist, bdist, mat
-				);
-			case 1:
-				return std::make_unique<Cylinder>(
-					d3dApp, rng, adist, ddist, odist,
-					rdist, bdist, tdist
-				);
-			case 2:
-				return std::make_unique<Pyramid>(
-					d3dApp, rng, adist, ddist, odist,
-					rdist, tdist
-				);
-			case 3:
-				return std::make_unique<SkinnedBox>(
-					d3dApp, rng, adist, ddist, odist,
-					rdist
-				);
-			case 4:
-				return std::make_unique<Skull>(
-					d3dApp, rng, adist, ddist, odist,
-					rdist, mat
-				);
-			default:
-				assert(false && "impossible drawable option in factory");
-				return {};
-			}*/
-		}
-	private:
-		D3DApp& d3dApp;
-		std::mt19937 rng{ std::random_device{}() };
-		std::uniform_int_distribution<int> sdist{ 0,4 };
-		std::uniform_real_distribution<float> adist{ 0.0f,PI * 2.0f };
-		std::uniform_real_distribution<float> ddist{ 0.0f,PI * 0.5f };
-		std::uniform_real_distribution<float> odist{ 0.0f,PI * 0.08f };
-		std::uniform_real_distribution<float> rdist{ 6.0f,20.0f };
-		std::uniform_real_distribution<float> bdist{ 0.4f,3.0f };
-		std::uniform_real_distribution<float> cdist{ 0.0f,1.0f };
-		std::uniform_int_distribution<int> tdist{ 3,30 };
-	};
-
-	Factory f(*d3dApp);
-	drawables.reserve(nDrawables);
-	std::generate_n(std::back_inserter(drawables), nDrawables, f);
-
-	for (auto& pd : drawables)
-	{
-		if (auto pb = dynamic_cast<Box*>(pd.get()))
-		{
-			boxes.push_back(pb);
-		}
-	}
+	nano = std::make_unique<Model>(*d3dApp, "Models\\nanosuit.obj");
 
 	d3dApp->SetProjection(DirectX::XMMatrixPerspectiveLH(1.0f, 3.0f / 4.0f, 0.5f, 40.0f));
 	gm.Start();
@@ -240,77 +162,15 @@ void App::Draw()
 	d3dApp->SetCamera(cam.GetMatrix());
 	light->Bind(*d3dApp, cam.GetMatrix());
 
-	for (auto& d : drawables)
-	{
-		d->Update(keys[VK_SPACE] ? 0.0f : dt);
-		d->Draw(*d3dApp);
-	}
+	const auto transform = DirectX::XMMatrixRotationRollPitchYaw(pos.roll, pos.pitch, pos.yaw) *
+		DirectX::XMMatrixTranslation(pos.x, pos.y, pos.z);
+	nano->Draw(*d3dApp, transform);
 	light->Draw(*d3dApp);
 
-	SpawnSimulationWindow();
 	cam.SpawnControlWindow();
 	light->SpawnControlWindow();
-	SpawnBoxWindowManagerWindow();
-	SpawnBoxWindows();
 
 	d3dApp->EndScene();
-}
-
-void App::SpawnSimulationWindow() noexcept
-{
-	if (ImGui::Begin("Simulation Speed"))
-	{
-		ImGui::SliderFloat("Speed Factor", &speed_factor, 0.0f, 6.0f, "%.4f", 3.2f);
-		ImGui::Text("%.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-		ImGui::Text("Status: %s", keys[VK_SPACE] ? "PAUSED" : "RUNNING (hold spacebar to pause)");
-	}
-	ImGui::End();
-}
-
-void App::SpawnBoxWindowManagerWindow() noexcept
-{
-	if (ImGui::Begin("Boxes"))
-	{
-		using namespace std::string_literals;
-		const auto preview = comboBoxIndex ? std::to_string(*comboBoxIndex) : "Choose a box..."s;
-		if (ImGui::BeginCombo("Box Number", preview.c_str()))
-		{
-			for (int i = 0; i < boxes.size(); i++)
-			{
-				const bool selected = comboBoxIndex.has_value() && *comboBoxIndex == i;
-				if (ImGui::Selectable(std::to_string(i).c_str(), selected))
-				{
-					comboBoxIndex = i;
-				}
-				if (selected)
-				{
-					ImGui::SetItemDefaultFocus();
-				}
-			}
-			ImGui::EndCombo();
-		}
-		if (ImGui::Button("Spawn Control Window") && comboBoxIndex)
-		{
-			boxControlIds.insert(*comboBoxIndex);
-			comboBoxIndex.reset();
-		}
-	}
-	ImGui::End();
-}
-
-void App::SpawnBoxWindows() noexcept
-{
-	for (auto i = boxControlIds.begin(); i != boxControlIds.end(); )
-	{
-		if (!boxes[*i]->SpawnControlWindow(*i, *d3dApp))
-		{
-			i = boxControlIds.erase(i);
-		}
-		else
-		{
-			i++;
-		}
-	}
 }
 
 std::optional<int> App::ProcessMessage()

@@ -5,6 +5,7 @@
 
 SolidSphere::SolidSphere(D3DApp& d3dApp, float radius)
 {
+	using namespace Bind;
 	namespace dx = DirectX;
 
 	if (!IsStaticInitialized())

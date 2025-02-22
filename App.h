@@ -7,15 +7,9 @@
 #include <set>
 #include "D3DApp.h"
 #include "GameTimer.h"
-#include "Box.h"
-#include "Skull.h"
-#include "Melon.h"
-#include "Pyramid.h"
-#include "Sheet.h"
-#include "SkinnedBox.h"
 #include "PointLight.h"
-#include "Cylinder.h"
 #include "Camera.h"
+#include "Mesh.h"
 #include "AssTest.h"
 #include "ImguiManager.h"
 #include "imgui\imgui_impl_win32.h"
@@ -43,10 +37,6 @@ protected:
 	virtual void UpdateScene(float dt);
 	virtual void Draw();
 
-	void SpawnSimulationWindow() noexcept;
-	void SpawnBoxWindowManagerWindow() noexcept;
-	void SpawnBoxWindows() noexcept;
-
 	static std::optional<int> ProcessMessage();
 
 protected:
@@ -59,14 +49,19 @@ protected:
 private:
 	bool keys[256] = { false };
 	
-	std::vector<std::unique_ptr<class Drawable>> drawables;
-	std::vector<class Box*> boxes;
-	static constexpr size_t nDrawables = 1;
-
 	ImguiManager imgui;
 	float speed_factor = 1.0f;
 	Camera cam;
 	std::unique_ptr<PointLight> light;
-	std::optional<int> comboBoxIndex;
-	std::set<int> boxControlIds;
+
+	std::unique_ptr<Model> nano;
+	struct
+	{
+		float roll = 0.0f;
+		float pitch = 0.0f;
+		float yaw = 0.0f;
+		float x = 0.0f;
+		float y = 0.0f;
+		float z = 0.0f;
+	} pos;
 };

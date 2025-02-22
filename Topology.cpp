@@ -1,10 +1,13 @@
 #include "Topology.h"
 
-Topology::Topology(D3DApp& d3dApp, D3D11_PRIMITIVE_TOPOLOGY type)
-	: type(type)
-{}
-
-void Topology::Bind(D3DApp& d3dApp) noexcept
+namespace Bind
 {
-	GetContext(d3dApp)->IASetPrimitiveTopology(type);
+	Topology::Topology(D3DApp& d3dApp, D3D11_PRIMITIVE_TOPOLOGY type)
+		: type(type)
+	{}
+
+	void Topology::Bind(D3DApp& d3dApp) noexcept
+	{
+		GetContext(d3dApp)->IASetPrimitiveTopology(type);
+	}
 }

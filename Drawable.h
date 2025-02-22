@@ -1,10 +1,12 @@
 #pragma once
 #include "D3DApp.h"
-#include "GeometryGenerator.h"
-#include <memory>
 #include <DirectXMath.h>
 
-class Bindable;
+namespace Bind
+{
+	class Bindable;
+	class IndexBuffer;
+}
 
 class Drawable
 {
@@ -14,10 +16,10 @@ public:
 	Drawable() = default;
 	Drawable(const Drawable&) = delete;
 	virtual DirectX::XMMATRIX GetTransformXM() const noexcept = 0;
-	void Draw(D3DApp& d3dApp) const noexcept;
-	virtual void Update(float dt) noexcept = 0;
+	void Draw(D3DApp& d3dApp) const;
+	virtual void Update(float dt) noexcept
+	{}
 	virtual ~Drawable() = default;
-
 protected:
 	template<class T>
 	T* QueryBindable() noexcept
@@ -29,16 +31,13 @@ protected:
 				return pt;
 			}
 		}
-
 		return nullptr;
 	}
-	void AddBind(std::unique_ptr<Bindable> bind) noexcept;
-	void AddIndexBuffer(std::unique_ptr<class IndexBuffer> ibuf) noexcept;
-
+	void AddBind(std::unique_ptr<Bind::Bindable> bind);
+	void AddIndexBuffer(std::unique_ptr<Bind::IndexBuffer> ibuf);
 private:
-	virtual const std::vector<std::unique_ptr<Bindable>>& GetStaticBinds() const noexcept = 0;
-
+	virtual const std::vector<std::unique_ptr<Bind::Bindable>>& GetStaticBinds() const noexcept = 0;
 private:
-	const IndexBuffer* pIndexBuffer = nullptr;
-	std::vector<std::unique_ptr<Bindable>> binds;
+	const Bind::IndexBuffer* pIndexBuffer = nullptr;
+	std::vector<std::unique_ptr<Bind::Bindable>> binds;
 };
