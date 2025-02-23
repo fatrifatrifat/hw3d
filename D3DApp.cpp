@@ -5,10 +5,9 @@
 #include "imgui\imgui_impl_win32.h"
 #include <fstream>
 
-D3DApp::D3DApp()
+D3DApp::D3DApp(int width, int height)
+	: width(width), height(height)
 {
-	//input = std::make_unique<Input>();
-
 	using namespace DirectX;
 
 	XMMATRIX I = XMMatrixIdentity();
@@ -18,7 +17,7 @@ D3DApp::D3DApp()
 	XMStoreFloat4x4(&mProjectionMatrix, I);
 	
 
-	XMMATRIX P = XMMatrixPerspectiveFovLH(0.25f * PI, 800.f/600.f, 1.0f, 1000.0f);
+	XMMATRIX P = XMMatrixPerspectiveFovLH(0.25f * PI, static_cast<float>(width) / height, 1.0f, 1000.0f);
 	XMStoreFloat4x4(&mProjectionMatrix, P);
 }
 
@@ -32,8 +31,8 @@ bool D3DApp::InitD3D(HWND hWnd)
 	D3D_FEATURE_LEVEL featureLevel;
 
 	DXGI_SWAP_CHAIN_DESC sd;
-	sd.BufferDesc.Width = 800;
-	sd.BufferDesc.Height = 600;
+	sd.BufferDesc.Width = width;
+	sd.BufferDesc.Height = height;
 	sd.BufferDesc.RefreshRate.Numerator = 60;
 	sd.BufferDesc.RefreshRate.Denominator = 1;
 	sd.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
@@ -74,8 +73,8 @@ bool D3DApp::InitD3D(HWND hWnd)
 
 	ComPtr<ID3D11Texture2D> pDepthStencil;
 	D3D11_TEXTURE2D_DESC descDepth = {};
-	descDepth.Width = 800u;
-	descDepth.Height = 600u;
+	descDepth.Width = width;
+	descDepth.Height = height;
 	descDepth.MipLevels = 1u;
 	descDepth.ArraySize = 1u;
 	descDepth.Format = DXGI_FORMAT_D32_FLOAT;
@@ -109,8 +108,8 @@ bool D3DApp::InitD3D(HWND hWnd)
 
 	// configure viewport
 	D3D11_VIEWPORT vp;
-	vp.Width = 800.0f;
-	vp.Height = 600.0f;
+	vp.Width = width;
+	vp.Height = height;
 	vp.MinDepth = 0.0f;
 	vp.MaxDepth = 1.0f;
 	vp.TopLeftX = 0.0f;

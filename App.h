@@ -6,18 +6,19 @@
 #include <memory>
 #include <set>
 #include "D3DApp.h"
+#include "Keyboard.h"
+#include "Mouse.h"
 #include "GameTimer.h"
 #include "PointLight.h"
 #include "Camera.h"
 #include "Mesh.h"
-#include "AssTest.h"
 #include "ImguiManager.h"
 #include "imgui\imgui_impl_win32.h"
 
 class App
 {
 public:
-	App(HINSTANCE hInst);
+	App(HINSTANCE hInst, int width, int height);
 	App(const App& rhs) = delete;
 	App& operator=(const App& rhs) = delete;
 
@@ -29,13 +30,23 @@ public:
 	int Go();
 	void Shutdown();
 
-	LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
+	LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 protected:
 	bool InitWin();
 
 	virtual void UpdateScene(float dt);
 	virtual void Draw();
+
+	void EnableCursor() noexcept;
+	void DisableCursor() noexcept;
+
+	void ConfineCursor() noexcept;
+	void FreeCursor() noexcept;
+	void ShowCursor() noexcept;
+	void HideCursor() noexcept;
+	void EnableImGuiMouse() noexcept;
+	void DisableImGuiMouse() noexcept;
 
 	static std::optional<int> ProcessMessage();
 
@@ -46,9 +57,16 @@ protected:
 
 	std::unique_ptr<D3DApp> d3dApp;
 
+public:
+	Keyboard kbd;
+	Mouse mouse;
+
 private:
-	bool keys[256] = { false };
-	
+	int width;
+	int height;
+
+	bool cursorEnabled = false;
+
 	ImguiManager imgui;
 	float speed_factor = 1.0f;
 	Camera cam;

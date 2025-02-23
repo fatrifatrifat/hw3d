@@ -20,7 +20,7 @@ class D3DApp
 	friend class Bindable;
 
 public:
-	D3DApp();
+	D3DApp(int width, int height);
 	D3DApp(const D3DApp& rhs) = delete;
 	D3DApp& operator=(const D3DApp& rhs) = delete;
 	~D3DApp();
@@ -47,6 +47,9 @@ public:
 	bool IsImguiEnabled() const noexcept;
 
 private:
+	int width;
+	int height;
+
 	bool imguiEnabled = true;
 
 	ComPtr<ID3D11Device> pDevice;

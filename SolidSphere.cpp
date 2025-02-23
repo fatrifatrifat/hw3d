@@ -1,5 +1,5 @@
 #include "SolidSphere.h"
-#include "BindableBase.h"
+#include "BindableCommon.h"
 #include "Sphere.h"
 
 
