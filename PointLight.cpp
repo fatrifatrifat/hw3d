@@ -36,6 +36,20 @@ void PointLight::SpawnControlWindow() noexcept
 	ImGui::End();
 }
 
+void PointLight::Translate(DirectX::XMFLOAT3 translation) noexcept
+{
+	namespace dx = DirectX;
+	dx::XMStoreFloat3(&translation, dx::XMVector3Transform(
+		dx::XMLoadFloat3(&translation),
+		dx::XMMatrixScaling(travelSpeed, travelSpeed, travelSpeed)
+	));
+	cbData.pos = {
+		cbData.pos.x + translation.x,
+		cbData.pos.y + translation.y,
+		cbData.pos.z + translation.z
+	};
+}
+
 void PointLight::Reset() noexcept
 {
 	cbData = {

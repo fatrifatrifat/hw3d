@@ -5,7 +5,8 @@ namespace Bind
 {
 	namespace wrl = Microsoft::WRL;
 
-	Texture::Texture(D3DApp& d3dApp, const Surface& s)
+	Texture::Texture(D3DApp& d3dApp, const Surface& s, unsigned int slot)
+		: slot(slot)
 	{
 		// create texture resource
 		D3D11_TEXTURE2D_DESC textureDesc = {};
@@ -41,6 +42,6 @@ namespace Bind
 
 	void Texture::Bind(D3DApp& d3dApp) noexcept
 	{
-		GetContext(d3dApp)->PSSetShaderResources(0u, 1u, pTextureView.GetAddressOf());
+		GetContext(d3dApp)->PSSetShaderResources(slot, 1u, pTextureView.GetAddressOf());
 	}
 }

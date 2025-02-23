@@ -58,7 +58,7 @@ void App::InitApp()
 	}
 
 	light = std::make_unique<PointLight>(*d3dApp);
-	nano = std::make_unique<Model>(*d3dApp, "Models\\nano.gltf");
+	nano = std::make_unique<Model>(*d3dApp, "Models\\nano_textured\\nanosuit.obj");
 
 	d3dApp->SetProjection(DirectX::XMMatrixPerspectiveLH(1.0f, 3.0f / 4.0f, 0.5f, 40.0f));
 	gm.Start();
@@ -175,6 +175,7 @@ void App::Draw()
 
 	if (!CursorEnabled())
 	{
+		// Camera control
 		if (kbd.KeyIsPressed('W'))
 		{
 			cam.Translate({ 0.0f,0.0f,-dt });
@@ -199,6 +200,32 @@ void App::Draw()
 		{
 			cam.Translate({ 0.0f,dt,0.0f });
 		}
+	}
+
+	// Point light control
+	if (kbd.KeyIsPressed(VK_UP))
+	{
+		light->Translate({ 0.0f,0.0f,-dt });
+	}
+	if (kbd.KeyIsPressed(VK_DOWN))
+	{
+		light->Translate({ 0.0f,0.0f,dt });
+	}
+	if (kbd.KeyIsPressed(VK_LEFT))
+	{
+		light->Translate({ dt,0.0f,0.0f });
+	}
+	if (kbd.KeyIsPressed(VK_RIGHT))
+	{
+		light->Translate({ -dt,0.0f,0.0f });
+	}
+	if (kbd.KeyIsPressed(VK_INSERT))
+	{
+		light->Translate({ 0.0f,-dt,0.0f });
+	}
+	if (kbd.KeyIsPressed(VK_DELETE))
+	{
+		light->Translate({ 0.0f,dt,0.0f });
 	}
 
 	while (const auto delta = mouse.ReadRawDelta())
