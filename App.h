@@ -40,6 +40,7 @@ protected:
 
 	void EnableCursor() noexcept;
 	void DisableCursor() noexcept;
+	bool CursorEnabled() const noexcept;
 
 	void ConfineCursor() noexcept;
 	void FreeCursor() noexcept;
@@ -65,7 +66,11 @@ private:
 	int width;
 	int height;
 
-	bool cursorEnabled = false;
+	int x = 0;
+	int y = 0;
+
+	bool cursorEnabled = true;
+	std::vector<BYTE> rawBuffer;
 
 	ImguiManager imgui;
 	float speed_factor = 1.0f;

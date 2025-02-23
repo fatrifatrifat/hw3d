@@ -124,6 +124,13 @@ bool App::InitWin()
 
 	ImGui_ImplWin32_Init(hMainWnd);
 
+	RAWINPUTDEVICE rid;
+	rid.usUsagePage = 0x01; // mouse page
+	rid.usUsage = 0x02; // mouse usage
+	rid.dwFlags = 0;
+	rid.hwndTarget = nullptr;
+	RegisterRawInputDevices(&rid, 1, sizeof(rid));
+
 	return true;
 }
 
@@ -144,9 +151,38 @@ void App::Draw()
 	nano->Draw(*d3dApp);
 	light->Draw(*d3dApp);
 
+	while (const auto e = kbd.ReadKey())
+	{
+		if (e->IsPress() && e->GetCode() == VK_INSERT)
+		{
+			if (CursorEnabled())
+			{
+				DisableCursor();
+				mouse.EnableRaw();
+			}
+			else
+			{
+				EnableCursor();
+				mouse.DisableRaw();
+			}
+		}
+	}
+
 	cam.SpawnControlWindow();
 	light->SpawnControlWindow();
 	nano->ShowWindow();
+
+	while (const auto d = mouse.ReadRawDelta())
+	{
+		x += d->x;
+		y += d->y;
+	}
+	if (ImGui::Begin("Raw Input"))
+	{
+		ImGui::Text("Tally: (%d,%d)", x, y);
+		ImGui::Text("Cursor: %s", CursorEnabled() ? "enabled" : "disabled");
+	}
+	ImGui::End();
 
 	d3dApp->EndScene();
 }
@@ -165,6 +201,11 @@ void App::DisableCursor() noexcept
 	HideCursor();
 	DisableImGuiMouse();
 	ConfineCursor();
+}
+
+bool App::CursorEnabled() const noexcept
+{
+	return cursorEnabled;
 }
 
 void App::ConfineCursor() noexcept
@@ -407,6 +448,45 @@ LRESULT App::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		const POINTS pt = MAKEPOINTS(lParam);
 		const int delta = GET_WHEEL_DELTA_WPARAM(wParam);
 		mouse.OnWheelDelta(pt.x, pt.y, delta);
+		break;
+	}
+	case WM_INPUT:
+	{
+		if (!mouse.RawEnabled())
+		{
+			break;
+		}
+		UINT size;
+		// first get the size of the input data
+		if (GetRawInputData(
+			reinterpret_cast<HRAWINPUT>(lParam),
+			RID_INPUT,
+			nullptr,
+			&size,
+			sizeof(RAWINPUTHEADER)) == -1)
+		{
+			// bail msg processing if error
+			break;
+		}
+		rawBuffer.resize(size);
+		// read in the input data
+		if (GetRawInputData(
+			reinterpret_cast<HRAWINPUT>(lParam),
+			RID_INPUT,
+			rawBuffer.data(),
+			&size,
+			sizeof(RAWINPUTHEADER)) != size)
+		{
+			// bail msg processing if error
+			break;
+		}
+		// process the raw input data
+		auto& ri = reinterpret_cast<const RAWINPUT&>(*rawBuffer.data());
+		if (ri.header.dwType == RIM_TYPEMOUSE &&
+			(ri.data.mouse.lLastX != 0 || ri.data.mouse.lLastY != 0))
+		{
+			mouse.OnRawDelta(ri.data.mouse.lLastX, ri.data.mouse.lLastY);
+		}
 		break;
 	}
 	/************** END MOUSE MESSAGES **************/
