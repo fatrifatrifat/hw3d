@@ -146,15 +146,19 @@ void App::Draw()
 	d3dApp->SetCamera(cam.GetMatrix());
 	light->Bind(*d3dApp, cam.GetMatrix());
 
-	const auto transform = DirectX::XMMatrixRotationRollPitchYaw(pos.roll, pos.pitch, pos.yaw) *
-		DirectX::XMMatrixTranslation(pos.x, pos.y, pos.z);
 	nano->Draw(*d3dApp);
 	light->Draw(*d3dApp);
 
 	while (const auto e = kbd.ReadKey())
 	{
-		if (e->IsPress() && e->GetCode() == VK_INSERT)
+		if (!e->IsPress())
 		{
+			continue;
+		}
+
+		switch (e->GetCode())
+		{
+		case VK_ESCAPE:
 			if (CursorEnabled())
 			{
 				DisableCursor();
@@ -165,24 +169,49 @@ void App::Draw()
 				EnableCursor();
 				mouse.DisableRaw();
 			}
+			break;
+		}
+	}
+
+	if (!CursorEnabled())
+	{
+		if (kbd.KeyIsPressed('W'))
+		{
+			cam.Translate({ 0.0f,0.0f,-dt });
+		}
+		if (kbd.KeyIsPressed('A'))
+		{
+			cam.Translate({ dt,0.0f,0.0f });
+		}
+		if (kbd.KeyIsPressed('S'))
+		{
+			cam.Translate({ 0.0f,0.0f,dt });
+		}
+		if (kbd.KeyIsPressed('D'))
+		{
+			cam.Translate({ -dt,0.0f,0.0f });
+		}
+		if (kbd.KeyIsPressed(VK_SPACE))
+		{
+			cam.Translate({ 0.0f,-dt,0.0f });
+		}
+		if (kbd.KeyIsPressed(VK_SHIFT))
+		{
+			cam.Translate({ 0.0f,dt,0.0f });
+		}
+	}
+
+	while (const auto delta = mouse.ReadRawDelta())
+	{
+		if (!CursorEnabled())
+		{
+			cam.Rotate((float)delta->x / 2.5f, (float)delta->y / 2.5f);
 		}
 	}
 
 	cam.SpawnControlWindow();
 	light->SpawnControlWindow();
 	nano->ShowWindow();
-
-	while (const auto d = mouse.ReadRawDelta())
-	{
-		x += d->x;
-		y += d->y;
-	}
-	if (ImGui::Begin("Raw Input"))
-	{
-		ImGui::Text("Tally: (%d,%d)", x, y);
-		ImGui::Text("Cursor: %s", CursorEnabled() ? "enabled" : "disabled");
-	}
-	ImGui::End();
 
 	d3dApp->EndScene();
 }

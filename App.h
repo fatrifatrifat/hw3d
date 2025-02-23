@@ -8,6 +8,7 @@
 #include "D3DApp.h"
 #include "Keyboard.h"
 #include "Mouse.h"
+#include "MathHelper.h"
 #include "GameTimer.h"
 #include "PointLight.h"
 #include "Camera.h"
@@ -78,13 +79,4 @@ private:
 	std::unique_ptr<PointLight> light;
 
 	std::unique_ptr<Model> nano;
-	struct
-	{
-		float roll = 0.0f;
-		float pitch = 0.0f;
-		float yaw = 0.0f;
-		float x = 0.0f;
-		float y = 0.0f;
-		float z = 0.0f;
-	} pos;
 };
