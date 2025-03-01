@@ -14,12 +14,17 @@ Size=145,312
 Collapsed=0
 
 [Window][Model 1]
-Pos=757,75
-Size=239,199
-Collapsed=1
+Pos=60,60
+Size=32,48
+Collapsed=0
 
 [Window][Model 2]
-Pos=381,74
-Size=305,210
-Collapsed=1
+Pos=60,60
+Size=32,48
+Collapsed=0
+
+[Window][Plane]
+Pos=216,76
+Size=337,285
+Collapsed=0
 
