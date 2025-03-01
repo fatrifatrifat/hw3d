@@ -75,7 +75,8 @@ namespace Dvtx
 		{
 		public:
 			Element(ElementType type, size_t offset);
-			size_t GetOffsetAfter() const;
+			size_t GetOffsetAfter() const
+;
 			size_t GetOffset() const;
 			size_t Size() const;
 			static constexpr size_t SizeOf(ElementType type);
@@ -203,9 +204,10 @@ namespace Dvtx
 	class VertexBuffer
 	{
 	public:
-		VertexBuffer(VertexLayout layout);
+		VertexBuffer(VertexLayout layout, size_t size = 0u);
 		const char* GetData() const;
 		const VertexLayout& GetLayout() const noexcept;
+		void Resize(size_t newSize);
 		size_t Size() const;
 		size_t SizeBytes() const;
 		template<typename ...Params>

@@ -201,10 +201,12 @@
     <ClCompile Include="Sampler.cpp" />
     <ClCompile Include="SolidSphere.cpp" />
     <ClCompile Include="Surface.cpp" />
+    <ClCompile Include="TestCube.cpp" />
     <ClCompile Include="TestPlane.cpp" />
     <ClCompile Include="Texture.cpp" />
     <ClCompile Include="Topology.cpp" />
     <ClCompile Include="TransformCbuf.cpp" />
+    <ClCompile Include="TransformCbufDoubleboi.cpp" />
     <ClCompile Include="Vertex.cpp" />
     <ClCompile Include="VertexBuffer.cpp" />
     <ClCompile Include="VertexShader.cpp" />
@@ -218,6 +220,7 @@
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Color.h" />
     <ClInclude Include="ConstantBuffers.h" />
+    <ClInclude Include="Cube.h" />
     <ClInclude Include="D3DApp.h" />
     <ClInclude Include="Drawable.h" />
     <ClInclude Include="GameTimer.h" />
@@ -248,10 +251,12 @@
     <ClInclude Include="SolidSphere.h" />
     <ClInclude Include="Sphere.h" />
     <ClInclude Include="Surface.h" />
+    <ClInclude Include="TestCube.h" />
     <ClInclude Include="TestPlane.h" />
     <ClInclude Include="Texture.h" />
     <ClInclude Include="Topology.h" />
     <ClInclude Include="TransformCbuf.h" />
+    <ClInclude Include="TransformCbufDoubleboi.h" />
     <ClInclude Include="Utils.h" />
     <ClInclude Include="Vertex.h" />
     <ClInclude Include="VertexBuffer.h" />

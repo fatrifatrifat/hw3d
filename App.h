@@ -13,6 +13,7 @@
 #include "PointLight.h"
 #include "Camera.h"
 #include "TestPlane.h"
+#include "TestCube.h"
 #include "Mesh.h"
 #include "ImguiManager.h"
 #include "imgui\imgui_impl_win32.h"
@@ -82,4 +83,5 @@ private:
 	std::unique_ptr<Model> nano1;
 	std::unique_ptr<Model> nano2;
 	std::unique_ptr<TestPlane> plane;
+	std::unique_ptr<TestCube> cube;
 };

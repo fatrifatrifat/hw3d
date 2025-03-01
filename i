@@ -24,7 +24,7 @@ Size=32,48
 Collapsed=0
 
 [Window][Plane]
-Pos=216,76
-Size=337,285
+Pos=60,60
+Size=158,289
 Collapsed=0
 

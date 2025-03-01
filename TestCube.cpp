@@ -1,17 +1,18 @@
-#include "TestPlane.h"
-#include "Plane.h"
+#include "TestCube.h"
+#include "Cube.h"
 #include "BindableCommon.h"
 #include "TransformCbufDoubleboi.h"
 #include "imgui/imgui.h"
 
-TestPlane::TestPlane(D3DApp& d3dApp, float size)
+TestCube::TestCube(D3DApp& d3dApp, float size)
 {
 	using namespace Bind;
 	namespace dx = DirectX;
 
-	auto model = Plane::Make();
-	model.Transform(dx::XMMatrixScaling(size, size, 1.0f));
-	const auto geometryTag = "$plane." + std::to_string(size);
+	auto model = Cube::MakeIndependentTextured();
+	model.Transform(dx::XMMatrixScaling(size, size, size));
+	model.SetNormalsIndependentFlat();
+	const auto geometryTag = "$cube." + std::to_string(size);
 	AddBind(VertexBuffer::Resolve(d3dApp, geometryTag, model.vertices));
 	AddBind(IndexBuffer::Resolve(d3dApp, geometryTag, model.indices));
 
@@ -33,27 +34,27 @@ TestPlane::TestPlane(D3DApp& d3dApp, float size)
 	AddBind(std::make_shared<TransformCbufDoubleboi>(d3dApp, *this, 0u, 2u));
 }
 
-void TestPlane::SetPos(DirectX::XMFLOAT3 pos) noexcept
+void TestCube::SetPos(DirectX::XMFLOAT3 pos) noexcept
 {
 	this->pos = pos;
 }
 
-void TestPlane::SetRotation(float roll, float pitch, float yaw) noexcept
+void TestCube::SetRotation(float roll, float pitch, float yaw) noexcept
 {
 	this->roll = roll;
 	this->pitch = pitch;
 	this->yaw = yaw;
 }
 
-DirectX::XMMATRIX TestPlane::GetTransformXM() const noexcept
+DirectX::XMMATRIX TestCube::GetTransformXM() const noexcept
 {
 	return DirectX::XMMatrixRotationRollPitchYaw(roll, pitch, yaw) *
 		DirectX::XMMatrixTranslation(pos.x, pos.y, pos.z);
 }
 
-void TestPlane::SpawnControlWindow(D3DApp& d3dApp) noexcept
+void TestCube::SpawnControlWindow(D3DApp& d3dApp) noexcept
 {
-	if (ImGui::Begin("Plane"))
+	if (ImGui::Begin("Cube"))
 	{
 		ImGui::Text("Position");
 		ImGui::SliderFloat("X", &pos.x, -80.0f, 80.0f, "%.1f");

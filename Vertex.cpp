@@ -146,10 +146,20 @@ namespace Dvtx
 
 
 	// VertexBuffer
-	VertexBuffer::VertexBuffer(VertexLayout layout)
+	VertexBuffer::VertexBuffer(VertexLayout layout, size_t size)
 		:
 	layout(std::move(layout))
-	{}
+	{
+		Resize(size);
+	}
+	void VertexBuffer::Resize(size_t newSize)
+	{
+		const auto size = Size();
+		if (size < newSize)
+		{
+			buffer.resize(buffer.size() + layout.Size() * (newSize - size));
+		}
+	}
 	const char* VertexBuffer::GetData() const
 	{
 		return buffer.data();
