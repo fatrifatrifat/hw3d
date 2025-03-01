@@ -212,13 +212,13 @@
   <ItemGroup>
     <ClInclude Include="App.h" />
     <ClInclude Include="Bindable.h" />
+    <ClInclude Include="BindableCodex.h" />
     <ClInclude Include="BindableCommon.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Color.h" />
     <ClInclude Include="ConstantBuffers.h" />
     <ClInclude Include="D3DApp.h" />
     <ClInclude Include="Drawable.h" />
-    <ClInclude Include="DrawableBase.h" />
     <ClInclude Include="GameTimer.h" />
     <ClInclude Include="GDIPlusManager.h" />
     <ClInclude Include="GeometryGenerator.h" />

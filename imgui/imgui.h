@@ -120,7 +120,11 @@ struct ImGuiTextFilter;             // Helper to parse and apply text filters (e
 typedef void* ImTextureID;          // User data to identify a texture (this is whatever to you want it to be! read the FAQ about ImTextureID in imgui.cpp)
 #endif
 typedef unsigned int ImGuiID;       // Unique ID used by widgets (typically hashed from a stack of string)
-typedef unsigned short ImWchar;     // A single U16 character for keyboard input/display. We encode them as multi bytes UTF-8 when used in strings.
+typedef unsigned 
+
+
+
+ImWchar;     // A single U16 character for keyboard input/display. We encode them as multi bytes UTF-8 when used in strings.
 typedef int ImGuiCol;               // -> enum ImGuiCol_             // Enum: A color identifier for styling
 typedef int ImGuiCond;              // -> enum ImGuiCond_            // Enum: A condition for Set*()
 typedef int ImGuiDataType;          // -> enum ImGuiDataType_        // Enum: A primary data type

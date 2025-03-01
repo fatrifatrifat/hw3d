@@ -557,7 +557,8 @@ struct ImGuiGroupData
     bool        AdvanceCursor;
 };
 
-// Simple column measurement, currently used for MenuItem() only.. This is very short-sighted/throw-away code and NOT a generic helper.
+// Simple column measurement, currently used for MenuItem() only.. This is very 
+// -sighted/throw-away code and NOT a generic helper.
 struct IMGUI_API ImGuiMenuColumns
 {
     int         Count;

@@ -1,5 +1,5 @@
 #pragma once
-#include "DrawableBase.h"
+#include "Drawable.h"
 #include "BindableCommon.h"
 #include "Vertex.h"
 #include <optional>
@@ -7,10 +7,10 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
-class Mesh : public DrawableBase<Mesh>
+class Mesh : public Drawable
 {
 public:
-	Mesh(D3DApp& d3dApp, std::vector<std::unique_ptr<Bind::Bindable>> bindPtrs);
+	Mesh(D3DApp& d3dApp, std::vector<std::shared_ptr<Bind::Bindable>> bindPtrs);
 	void Draw(D3DApp& d3dApp, DirectX::FXMMATRIX accumulatedTransform) const;
 	DirectX::XMMATRIX GetTransformXM() const noexcept override;
 private:

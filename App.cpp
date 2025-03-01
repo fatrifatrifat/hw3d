@@ -58,7 +58,8 @@ void App::InitApp()
 	}
 
 	light = std::make_unique<PointLight>(*d3dApp);
-	nano = std::make_unique<Model>(*d3dApp, "Models\\nano_textured\\nanosuit.obj");
+	nano1 = std::make_unique<Model>(*d3dApp, "Models\\nano_textured\\nanosuit.obj");
+	nano2 = std::make_unique<Model>(*d3dApp, "Models\\nano_textured\\nanosuit.obj");
 
 	d3dApp->SetProjection(DirectX::XMMatrixPerspectiveLH(1.0f, 3.0f / 4.0f, 0.5f, 40.0f));
 	gm.Start();
@@ -146,7 +147,8 @@ void App::Draw()
 	d3dApp->SetCamera(cam.GetMatrix());
 	light->Bind(*d3dApp, cam.GetMatrix());
 
-	nano->Draw(*d3dApp);
+	nano1->Draw(*d3dApp);
+	nano2->Draw(*d3dApp);
 	light->Draw(*d3dApp);
 
 	while (const auto e = kbd.ReadKey())
@@ -238,7 +240,8 @@ void App::Draw()
 
 	cam.SpawnControlWindow();
 	light->SpawnControlWindow();
-	nano->ShowWindow();
+	nano1->ShowWindow("Model 1");
+	nano2->ShowWindow("Model 2");
 
 	d3dApp->EndScene();
 }

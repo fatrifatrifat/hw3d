@@ -1,6 +1,7 @@
 #pragma once
 #include "D3DApp.h"
 #include <DirectXMath.h>
+#include <memory>
 
 namespace Bind
 {
@@ -10,15 +11,11 @@ namespace Bind
 
 class Drawable
 {
-	template<class T>
-	friend class DrawableBase;
 public:
 	Drawable() = default;
 	Drawable(const Drawable&) = delete;
 	virtual DirectX::XMMATRIX GetTransformXM() const noexcept = 0;
 	void Draw(D3DApp& d3dApp) const;
-	virtual void Update(float dt) noexcept
-	{}
 	virtual ~Drawable() = default;
 protected:
 	template<class T>
@@ -33,11 +30,8 @@ protected:
 		}
 		return nullptr;
 	}
-	void AddBind(std::unique_ptr<Bind::Bindable> bind);
-	void AddIndexBuffer(std::unique_ptr<Bind::IndexBuffer> ibuf);
-private:
-	virtual const std::vector<std::unique_ptr<Bind::Bindable>>& GetStaticBinds() const noexcept = 0;
+	void AddBind(std::shared_ptr<Bind::Bindable> bind);
 private:
 	const Bind::IndexBuffer* pIndexBuffer = nullptr;
-	std::vector<std::unique_ptr<Bind::Bindable>> binds;
+	std::vector<std::shared_ptr<Bind::Bindable>> binds;
 };

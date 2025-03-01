@@ -10,22 +10,16 @@ void Drawable::Draw(D3DApp& d3dApp) const
 	{
 		b->Bind(d3dApp);
 	}
-	for (auto& b : GetStaticBinds())
-	{
-		b->Bind(d3dApp);
-	}
 	d3dApp.DrawIndexed(pIndexBuffer->GetCount());
 }
 
-void Drawable::AddBind(std::unique_ptr<Bind::Bindable> bind)
+void Drawable::AddBind(std::shared_ptr<Bind::Bindable> bind)
 {
-	assert("*Must* use AddIndexBuffer to bind index buffer" && typeid(*bind) != typeid(IndexBuffer));
+	// special case for index buffer
+	if (typeid(*bind) == typeid(IndexBuffer))
+	{
+		assert("Binding multiple index buffers not allowed" && pIndexBuffer == nullptr);
+		pIndexBuffer = &static_cast<IndexBuffer&>(*bind);
+	}
 	binds.push_back(std::move(bind));
-}
-
-void Drawable::AddIndexBuffer(std::unique_ptr<IndexBuffer> ibuf)
-{
-	assert("Attempting to add index buffer a second time" && pIndexBuffer == nullptr);
-	pIndexBuffer = ibuf.get();
-	binds.push_back(std::move(ibuf));
 }

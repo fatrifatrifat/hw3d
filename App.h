@@ -78,5 +78,6 @@ private:
 	Camera cam;
 	std::unique_ptr<PointLight> light;
 
-	std::unique_ptr<Model> nano;
+	std::unique_ptr<Model> nano1;
+	std::unique_ptr<Model> nano2;
 };

@@ -1,13 +1,19 @@
 #include "Texture.h"
 #include "Surface.h"
+#include "BindableCodex.h"
 
 namespace Bind
 {
 	namespace wrl = Microsoft::WRL;
 
-	Texture::Texture(D3DApp& d3dApp, const Surface& s, unsigned int slot)
-		: slot(slot)
+	Texture::Texture(D3DApp& d3dApp, const std::string& path, UINT slot)
+		:
+		path(path),
+		slot(slot)
 	{
+		// load surface
+		const auto s = Surface::FromFile(path);
+
 		// create texture resource
 		D3D11_TEXTURE2D_DESC textureDesc = {};
 		textureDesc.Width = s.GetWidth();
@@ -43,5 +49,18 @@ namespace Bind
 	void Texture::Bind(D3DApp& d3dApp) noexcept
 	{
 		GetContext(d3dApp)->PSSetShaderResources(slot, 1u, pTextureView.GetAddressOf());
+	}
+	std::shared_ptr<Texture> Texture::Resolve(D3DApp& d3dApp, const std::string& path, UINT slot)
+	{
+		return Codex::Resolve<Texture>(d3dApp, path, slot);
+	}
+	std::string Texture::GenerateUID(const std::string& path, UINT slot)
+	{
+		using namespace std::string_literals;
+		return typeid(Texture).name() + "#"s + path + "#" + std::to_string(slot);
+	}
+	std::string Texture::GetUID() const noexcept
+	{
+		return GenerateUID(path, slot);
 	}
 }

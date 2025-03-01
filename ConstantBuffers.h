@@ -1,5 +1,6 @@
 #pragma once
 #include "Bindable.h"
+#include "BindableCodex.h"
 
 namespace Bind
 {
@@ -19,7 +20,8 @@ namespace Bind
 			GetContext(d3dApp)->Unmap(pConstantBuffer.Get(), 0u);
 		}
 		ConstantBuffer(D3DApp& d3dApp, const C& consts, UINT slot = 0u)
-			: slot(slot)
+			:
+			slot(slot)
 		{
 			D3D11_BUFFER_DESC cbd;
 			cbd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
@@ -34,9 +36,9 @@ namespace Bind
 			GetDevice(d3dApp)->CreateBuffer(&cbd, &csd, &pConstantBuffer);
 		}
 		ConstantBuffer(D3DApp& d3dApp, UINT slot = 0u)
-			: slot(slot)
+			:
+			slot(slot)
 		{
-
 			D3D11_BUFFER_DESC cbd;
 			cbd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 			cbd.Usage = D3D11_USAGE_DYNAMIC;
@@ -63,6 +65,27 @@ namespace Bind
 		{
 			GetContext(d3dApp)->VSSetConstantBuffers(slot, 1u, pConstantBuffer.GetAddressOf());
 		}
+		static std::shared_ptr<VertexConstantBuffer> Resolve(D3DApp& d3dApp, const C& consts, UINT slot = 0)
+		{
+			return Codex::Resolve<VertexConstantBuffer>(d3dApp, consts, slot);
+		}
+		static std::shared_ptr<VertexConstantBuffer> Resolve(D3DApp& d3dApp, UINT slot = 0)
+		{
+			return Codex::Resolve<VertexConstantBuffer>(d3dApp, slot);
+		}
+		static std::string GenerateUID(const C&, UINT slot)
+		{
+			return GenerateUID(slot);
+		}
+		static std::string GenerateUID(UINT slot = 0)
+		{
+			using namespace std::string_literals;
+			return typeid(VertexConstantBuffer).name() + "#"s + std::to_string(slot);
+		}
+		std::string GetUID() const noexcept override
+		{
+			return GenerateUID(slot);
+		}
 	};
 
 	template<typename C>
@@ -76,6 +99,27 @@ namespace Bind
 		void Bind(D3DApp& d3dApp) noexcept override
 		{
 			GetContext(d3dApp)->PSSetConstantBuffers(slot, 1u, pConstantBuffer.GetAddressOf());
+		}
+		static std::shared_ptr<PixelConstantBuffer> Resolve(D3DApp& d3dApp, const C& consts, UINT slot = 0)
+		{
+			return Codex::Resolve<PixelConstantBuffer>(d3dApp, consts, slot);
+		}
+		static std::shared_ptr<PixelConstantBuffer> Resolve(D3DApp& d3dApp, UINT slot = 0)
+		{
+			return Codex::Resolve<PixelConstantBuffer>(d3dApp, slot);
+		}
+		static std::string GenerateUID(const C&, UINT slot)
+		{
+			return GenerateUID(slot);
+		}
+		static std::string GenerateUID(UINT slot = 0)
+		{
+			using namespace std::string_literals;
+			return typeid(PixelConstantBuffer).name() + "#"s + std::to_string(slot);
+		}
+		std::string GetUID() const noexcept override
+		{
+			return GenerateUID(slot);
 		}
 	};
 }
