@@ -22,7 +22,7 @@ TestPlane::TestPlane(D3DApp& d3dApp, float size)
 	auto pvsbc = pvs->GetBytecode();
 	AddBind(std::move(pvs));
 
-	AddBind(PixelShader::Resolve(d3dApp, "PhongPSNormalMap.cso"));
+	AddBind(PixelShader::Resolve(d3dApp, "PhongPSNormalMapObject.cso"));
 
 	AddBind(PixelConstantBuffer<PSMaterialConstant>::Resolve(d3dApp, pmc, 1u));
 

@@ -9,16 +9,38 @@ cbuffer LightCBuf
     float attQuad;
 };
 
+cbuffer ObjectCBuf
+{
+    bool normalMapEnabled;
+    float padding[3];
+};
+
 Texture2D tex;
 Texture2D spec;
+Texture2D nmap;
 
 SamplerState splr;
 
 
-float4 main(float3 worldPos : Position, float3 n : Normal, float2 tc : Texcoord) : SV_Target
+float4 main(float3 viewPos : Position, float3 n : Normal, float3 tan : Tangent, float3 bitan : Bitangent, float2 tc : Texcoord) : SV_Target
 {
+    // sample normal from map if normal mapping enabled
+    if (normalMapEnabled)
+    {
+        // build the tranform (rotation) into tangent space
+        const float3x3 tanToView = float3x3(
+            normalize(tan),
+            normalize(bitan),
+            normalize(n)
+        );
+        // unpack normal data
+        const float3 normalSample = nmap.Sample(splr, tc).xyz;
+        n = normalSample * 2.0f - 1.0f;
+        // bring normal from tanspace into view space
+        n = mul(n, tanToView);
+    }
 	// fragment to light vector data
-    const float3 vToL = lightPos - worldPos;
+    const float3 vToL = lightPos - viewPos;
     const float distToL = length(vToL);
     const float3 dirToL = vToL / distToL;
 	// attenuation
@@ -32,7 +54,7 @@ float4 main(float3 worldPos : Position, float3 n : Normal, float2 tc : Texcoord)
     const float4 specularSample = spec.Sample(splr, tc);
     const float3 specularReflectionColor = specularSample.rgb;
     const float specularPower = pow(2.0f, specularSample.a * 13.0f);
-    const float3 specular = att * (diffuseColor * diffuseIntensity) * pow(max(0.0f, dot(normalize(-r), normalize(worldPos))), specularPower);
+    const float3 specular = att * (diffuseColor * diffuseIntensity) * pow(max(0.0f, dot(normalize(-r), normalize(viewPos))), specularPower);
 	// final color
     return float4(saturate((diffuse + ambient) * tex.Sample(splr, tc).rgb + specular * specularReflectionColor), 1.0f);
 }

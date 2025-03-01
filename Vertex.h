@@ -15,6 +15,8 @@ namespace Dvtx
 			Position3D,
 			Texture2D,
 			Normal,
+			Tangent,
+			Bitangent,
 			Float3Color,
 			Float4Color,
 			BGRAColor,
@@ -49,6 +51,20 @@ namespace Dvtx
 			static constexpr const char* semantic = "Normal";
 			static constexpr const char* code = "N";
 		};
+		template<> struct Map<Tangent>
+		{
+			using SysType = DirectX::XMFLOAT3;
+			static constexpr DXGI_FORMAT dxgiFormat = DXGI_FORMAT_R32G32B32_FLOAT;
+			static constexpr const char* semantic = "Tangent";
+			static constexpr const char* code = "Nt";
+		};
+		template<> struct Map<Bitangent>
+		{
+			using SysType = DirectX::XMFLOAT3;
+			static constexpr DXGI_FORMAT dxgiFormat = DXGI_FORMAT_R32G32B32_FLOAT;
+			static constexpr const char* semantic = "Bitangent";
+			static constexpr const char* code = "Nb";
+		};
 		template<> struct Map<Float3Color>
 		{
 			using SysType = DirectX::XMFLOAT3;
@@ -75,8 +91,7 @@ namespace Dvtx
 		{
 		public:
 			Element(ElementType type, size_t offset);
-			size_t GetOffsetAfter() const
-;
+			size_t GetOffsetAfter() const;
 			size_t GetOffset() const;
 			size_t Size() const;
 			static constexpr size_t SizeOf(ElementType type);
@@ -145,6 +160,12 @@ namespace Dvtx
 				break;
 			case VertexLayout::Normal:
 				SetAttribute<VertexLayout::Normal>(pAttribute, std::forward<T>(val));
+				break;
+			case VertexLayout::Tangent:
+				SetAttribute<VertexLayout::Tangent>(pAttribute, std::forward<T>(val));
+				break;
+			case VertexLayout::Bitangent:
+				SetAttribute<VertexLayout::Bitangent>(pAttribute, std::forward<T>(val));
 				break;
 			case VertexLayout::Float3Color:
 				SetAttribute<VertexLayout::Float3Color>(pAttribute, std::forward<T>(val));

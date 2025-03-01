@@ -80,8 +80,6 @@ private:
 	Camera cam;
 	std::unique_ptr<PointLight> light;
 
-	std::unique_ptr<Model> nano1;
-	std::unique_ptr<Model> nano2;
+	std::unique_ptr<Model> wall;
 	std::unique_ptr<TestPlane> plane;
-	std::unique_ptr<TestCube> cube;
 };

@@ -43,6 +43,7 @@ public:
 	Model(D3DApp& d3dApp, const std::string fileName);
 	void Draw(D3DApp& d3dApp) const;
 	void ShowWindow(const char* windowName = nullptr) noexcept;
+	void SetRootTransform(DirectX::FXMMATRIX tf) noexcept;
 	~Model() noexcept;
 private:
 	static std::unique_ptr<Mesh> ParseMesh(D3DApp& d3dApp, const aiMesh& mesh, const aiMaterial* const* pMaterials);
