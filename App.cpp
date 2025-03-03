@@ -58,10 +58,7 @@ void App::InitApp()
 	}
 
 	light = std::make_unique<PointLight>(*d3dApp);
-	wall = std::make_unique<Model>(*d3dApp, "Models\\brick_wall\\brick_wall.obj");
-	wall->SetRootTransform(DirectX::XMMatrixTranslation(-1.5f, 0.0f, 0.0f));
-	plane = std::make_unique<TestPlane>(*d3dApp, 1.0f);
-	plane->SetPos({ 1.5f,0.0f,0.0f });
+	goblin = std::make_unique<Model>(*d3dApp, "Models\\gobber\\GoblinX.obj");
 
 	d3dApp->SetProjection(DirectX::XMMatrixPerspectiveLH(1.0f, 3.0f / 4.0f, 0.5f, 40.0f));
 	gm.Start();
@@ -149,9 +146,8 @@ void App::Draw()
 	d3dApp->SetCamera(cam.GetMatrix());
 	light->Bind(*d3dApp, cam.GetMatrix());
 
-	wall->Draw(*d3dApp);
+	goblin->Draw(*d3dApp);
 	light->Draw(*d3dApp);
-	plane->Draw(*d3dApp);
 
 	while (const auto e = kbd.ReadKey())
 	{
@@ -236,14 +232,13 @@ void App::Draw()
 	{
 		if (!CursorEnabled())
 		{
-			cam.Rotate((float)delta->x / 2.5f, (float)delta->y / 2.5f);
+			cam.Rotate((float)delta->x, (float)delta->y);
 		}
 	}
 
 	cam.SpawnControlWindow();
 	light->SpawnControlWindow();
-	wall->ShowWindow("Model 2");
-	plane->SpawnControlWindow(*d3dApp);
+	goblin->ShowWindow(*d3dApp, "gobber");
 
 	d3dApp->EndScene();
 }

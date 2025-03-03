@@ -36,6 +36,19 @@ void PointLight::SpawnControlWindow() noexcept
 	ImGui::End();
 }
 
+void PointLight::Reset() noexcept
+{
+	cbData = {
+		{ 2.0f,9.0f,-17.0f },
+		{ 0.4f,0.4f,0.4f },
+		{ 1.0f,1.0f,1.0f },
+		1.0f,
+		1.0f,
+		0.045f,
+		0.0075f,
+	};
+}
+
 void PointLight::Translate(DirectX::XMFLOAT3 translation) noexcept
 {
 	namespace dx = DirectX;
@@ -50,20 +63,7 @@ void PointLight::Translate(DirectX::XMFLOAT3 translation) noexcept
 	};
 }
 
-void PointLight::Reset() noexcept
-{
-	cbData = {
-		{ 0.0f,0.0f,0.0f },
-		{ 0.05f,0.05f,0.05f },
-		{ 1.0f,1.0f,1.0f },
-		1.0f,
-		1.0f,
-		0.045f,
-		0.0075f,
-	};
-}
-
-void PointLight::Draw(D3DApp& d3dApp) const noexcept
+void PointLight::Draw(D3DApp& d3dApp) const
 {
 	mesh.SetPos(cbData.pos);
 	mesh.Draw(d3dApp);

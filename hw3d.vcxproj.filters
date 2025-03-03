@@ -325,6 +325,12 @@
     <FxCompile Include="PhongPSNormalMapObject.hlsl">
       <Filter>Resource Files</Filter>
     </FxCompile>
+    <FxCompile Include="PhongVSNotex.hlsl">
+      <Filter>Resource Files</Filter>
+    </FxCompile>
+    <FxCompile Include="PhongPSNotex.hlsl">
+      <Filter>Resource Files</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <Text Include="Models\Skull.txt">

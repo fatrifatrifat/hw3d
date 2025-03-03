@@ -41,7 +41,7 @@ void Surface::Clear(Color fillValue) noexcept
 	memset(pBuffer.get(), fillValue.dword, width * height * sizeof(Color));
 }
 
-void Surface::PutPixel(unsigned int x, unsigned int y, Color c) noexcept
+void Surface::PutPixel(unsigned int x, unsigned int y, Color c)
 {
 	assert(x >= 0);
 	assert(y >= 0);
@@ -50,7 +50,7 @@ void Surface::PutPixel(unsigned int x, unsigned int y, Color c) noexcept
 	pBuffer[y * width + x] = c;
 }
 
-Surface::Color Surface::GetPixel(unsigned int x, unsigned int y) const noexcept
+Surface::Color Surface::GetPixel(unsigned int x, unsigned int y) const
 {
 	assert(x >= 0);
 	assert(y >= 0);
@@ -90,18 +90,13 @@ Surface Surface::FromFile(const std::string& name)
 	unsigned int height = 0;
 	std::unique_ptr<Color[]> pBuffer;
 
+	bool alphaLoaded = false;
 	{
 		// convert filenam to wide string (for Gdiplus)
 		wchar_t wideName[512];
 		mbstowcs_s(nullptr, wideName, name.c_str(), _TRUNCATE);
 
 		Gdiplus::Bitmap bitmap(wideName);
-		/*if (bitmap.GetLastStatus() != Gdiplus::Status::Ok)
-		{
-			std::stringstream ss;
-			ss << "Loading image [" << name << "]: failed to load.";
-			throw Exception(__LINE__, __FILE__, ss.str());
-		}*/
 
 		width = bitmap.GetWidth();
 		height = bitmap.GetHeight();
@@ -114,11 +109,15 @@ Surface Surface::FromFile(const std::string& name)
 				Gdiplus::Color c;
 				bitmap.GetPixel(x, y, &c);
 				pBuffer[y * width + x] = c.GetValue();
+				if (c.GetAlpha() != 255)
+				{
+					alphaLoaded = true;
+				}
 			}
 		}
 	}
 
-	return Surface(width, height, std::move(pBuffer));
+	return Surface(width, height, std::move(pBuffer), alphaLoaded);
 }
 
 void Surface::Save(const std::string& filename) const
@@ -131,20 +130,8 @@ void Surface::Save(const std::string& filename) const
 			Gdiplus::ImageCodecInfo* pImageCodecInfo = nullptr;
 
 			Gdiplus::GetImageEncodersSize(&num, &size);
-			/*if (size == 0)
-			{
-				std::stringstream ss;
-				ss << "Saving surface to [" << filename << "]: failed to get encoder; size == 0.";
-				throw Exception(__LINE__, __FILE__, ss.str());
-			}*/
 
 			pImageCodecInfo = (Gdiplus::ImageCodecInfo*)(malloc(size));
-			/*if (pImageCodecInfo == nullptr)
-			{
-				std::stringstream ss;
-				ss << "Saving surface to [" << filename << "]: failed to get encoder; failed to allocate memory.";
-				throw Exception(__LINE__, __FILE__, ss.str());
-			}*/
 
 			GetImageEncoders(num, size, pImageCodecInfo);
 
@@ -159,10 +146,6 @@ void Surface::Save(const std::string& filename) const
 			}
 
 			free(pImageCodecInfo);
-			/*std::stringstream ss;
-			ss << "Saving surface to [" << filename <<
-				"]: failed to get encoder; failed to find matching encoder.";
-			throw Exception(__LINE__, __FILE__, ss.str());*/
 		};
 
 	CLSID bmpID;
@@ -174,24 +157,24 @@ void Surface::Save(const std::string& filename) const
 	mbstowcs_s(nullptr, wideName, filename.c_str(), _TRUNCATE);
 
 	Gdiplus::Bitmap bitmap(width, height, width * sizeof(Color), PixelFormat32bppARGB, (BYTE*)pBuffer.get());
-	/*if (bitmap.Save(wideName, &bmpID, nullptr) != Gdiplus::Status::Ok)
-	{
-		std::stringstream ss;
-		ss << "Saving surface to [" << filename << "]: failed to save.";
-		throw Exception(__LINE__, __FILE__, ss.str());
-	}*/
 }
 
-void Surface::Copy(const Surface& src) noexcept
+bool Surface::AlphaLoaded() const noexcept
+{
+	return alphaLoaded;
+}
+
+void Surface::Copy(const Surface& src)
 {
 	assert(width == src.width);
 	assert(height == src.height);
 	memcpy(pBuffer.get(), src.pBuffer.get(), width * height * sizeof(Color));
 }
 
-Surface::Surface(unsigned int width, unsigned int height, std::unique_ptr<Color[]> pBufferParam) noexcept
+Surface::Surface(unsigned int width, unsigned int height, std::unique_ptr<Color[]> pBufferParam, bool alphaLoaded) noexcept
 	:
 	width(width),
 	height(height),
-	pBuffer(std::move(pBufferParam))
+	pBuffer(std::move(pBufferParam)),
+	alphaLoaded(alphaLoaded)
 {}

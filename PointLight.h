@@ -9,7 +9,7 @@ public:
 	PointLight(D3DApp& d3dApp, float radius = 0.5f);
 	void SpawnControlWindow() noexcept;
 	void Reset() noexcept;
-	void Draw(D3DApp& d3dApp) const noexcept;
+	void Draw(D3DApp& d3dApp) const;
 	void Bind(D3DApp& d3dApp, DirectX::FXMMATRIX view) const noexcept; 
 	void Translate(DirectX::XMFLOAT3 translation) noexcept;
 private:
