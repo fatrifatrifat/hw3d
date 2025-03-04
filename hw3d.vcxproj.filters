@@ -298,19 +298,25 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="PhongPS.hlsl">
+    <FxCompile Include="ShaderOps.hlsl">
       <Filter>Resource Files</Filter>
     </FxCompile>
-    <FxCompile Include="PhongVS.hlsl">
+    <FxCompile Include="Transform.hlsl">
       <Filter>Resource Files</Filter>
     </FxCompile>
-    <FxCompile Include="SolidPS.hlsl">
+    <FxCompile Include="PointLight.hlsl">
       <Filter>Resource Files</Filter>
     </FxCompile>
-    <FxCompile Include="SolidVS.hlsl">
+    <FxCompile Include="PhongPSSpec.hlsl">
       <Filter>Resource Files</Filter>
     </FxCompile>
-    <FxCompile Include="PhongPSSpecMap.hlsl">
+    <FxCompile Include="PhongPSNotex.hlsl">
+      <Filter>Resource Files</Filter>
+    </FxCompile>
+    <FxCompile Include="PhongVSNotex.hlsl">
+      <Filter>Resource Files</Filter>
+    </FxCompile>
+    <FxCompile Include="LightVectorData.hlsl">
       <Filter>Resource Files</Filter>
     </FxCompile>
     <FxCompile Include="PhongPSNormalMap.hlsl">
@@ -325,10 +331,16 @@
     <FxCompile Include="PhongPSNormalMapObject.hlsl">
       <Filter>Resource Files</Filter>
     </FxCompile>
-    <FxCompile Include="PhongVSNotex.hlsl">
+    <FxCompile Include="PhongPS.hlsl">
       <Filter>Resource Files</Filter>
     </FxCompile>
-    <FxCompile Include="PhongPSNotex.hlsl">
+    <FxCompile Include="PhongVS.hlsl">
+      <Filter>Resource Files</Filter>
+    </FxCompile>
+    <FxCompile Include="SolidPS.hlsl">
+      <Filter>Resource Files</Filter>
+    </FxCompile>
+    <FxCompile Include="SolidVS.hlsl">
       <Filter>Resource Files</Filter>
     </FxCompile>
   </ItemGroup>
