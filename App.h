@@ -21,7 +21,7 @@
 class App
 {
 public:
-	App(HINSTANCE hInst, int width, int height);
+	App(HINSTANCE hInst, int width, int height, const std::string& commandLine = "");
 	App(const App& rhs) = delete;
 	App& operator=(const App& rhs) = delete;
 
@@ -68,6 +68,7 @@ public:
 private:
 	int width;
 	int height;
+	std::string commandLine;
 
 	int x = 0;
 	int y = 0;
@@ -81,4 +82,7 @@ private:
 	std::unique_ptr<PointLight> light;
 
 	std::unique_ptr<Model> goblin;
+	std::unique_ptr<Model> nano;
+	std::unique_ptr<Model> wall;
+	std::unique_ptr<TestPlane> tp;
 };

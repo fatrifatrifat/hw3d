@@ -178,6 +178,7 @@
     <ClCompile Include="App.cpp" />
     <ClCompile Include="Bindable.cpp" />
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="ChiliXM.cpp" />
     <ClCompile Include="D3DApp.cpp" />
     <ClCompile Include="Drawable.cpp" />
     <ClCompile Include="GameTimer.cpp" />
@@ -218,6 +219,7 @@
     <ClInclude Include="BindableCodex.h" />
     <ClInclude Include="BindableCommon.h" />
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="ChiliXM.h" />
     <ClInclude Include="Color.h" />
     <ClInclude Include="ConstantBuffers.h" />
     <ClInclude Include="Cube.h" />
@@ -244,6 +246,7 @@
     <ClInclude Include="MathHelper.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="Mouse.h" />
+    <ClInclude Include="NormalMapTwerker.h" />
     <ClInclude Include="PixelShader.h" />
     <ClInclude Include="Plane.h" />
     <ClInclude Include="PointLight.h" />

@@ -8,6 +8,7 @@
 #include <assimp/postprocess.h>
 #include "ConstantBuffers.h"
 #include <type_traits>
+#include <filesystem>
 #include "imgui/imgui.h"
 
 class Mesh : public Drawable
@@ -44,6 +45,7 @@ public:
 	Node(int id, const std::string& name, std::vector<Mesh*> meshPtrs, const DirectX::XMMATRIX& transform);
 	void Draw(D3DApp& d3dApp, DirectX::FXMMATRIX accumulatedTransform) const;
 	void SetAppliedTransform(DirectX::FXMMATRIX transform) noexcept;
+	const DirectX::XMFLOAT4X4& GetAppliedTransform() const noexcept;
 	int GetId() const noexcept;
 	void ShowTree(Node*& pSelectedNode) const noexcept;
 	template<class T>
@@ -114,13 +116,13 @@ private:
 class Model
 {
 public:
-	Model(D3DApp& d3dApp, const std::string fileName);
+	Model(D3DApp& d3dApp, const std::string& pathString, float scale = 1.0f);
 	void Draw(D3DApp& d3dApp) const;
 	void ShowWindow(D3DApp& d3dApp, const char* windowName = nullptr) noexcept;
 	void SetRootTransform(DirectX::FXMMATRIX tf) noexcept;
 	~Model() noexcept;
 private:
-	static std::unique_ptr<Mesh> ParseMesh(D3DApp& d3dApp, const aiMesh& mesh, const aiMaterial* const* pMaterials);
+	static std::unique_ptr<Mesh> ParseMesh(D3DApp& d3dApp, const aiMesh& mesh, const aiMaterial* const* pMaterials, const std::filesystem::path& path, float scale);
 	std::unique_ptr<Node> ParseNode(int& nextId, const aiNode& node) noexcept;
 private:
 	std::unique_ptr<Node> pRoot;

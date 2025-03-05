@@ -16,7 +16,7 @@ TestPlane::TestPlane(D3DApp& d3dApp, float size)
 	AddBind(IndexBuffer::Resolve(d3dApp, geometryTag, model.indices));
 
 	AddBind(Texture::Resolve(d3dApp, "Images\\brickwall.jpg"));
-	AddBind(Texture::Resolve(d3dApp, "Images\\brickwall_normal.jpg", 1u));
+	AddBind(Texture::Resolve(d3dApp, "Images\\brickwall_normal_obj.jpg", 1u));
 
 	auto pvs = VertexShader::Resolve(d3dApp, "PhongVS.cso");
 	auto pvsbc = pvs->GetBytecode();
@@ -24,7 +24,7 @@ TestPlane::TestPlane(D3DApp& d3dApp, float size)
 
 	AddBind(PixelShader::Resolve(d3dApp, "PhongPSNormalMapObject.cso"));
 
-	AddBind(PixelConstantBuffer<PSMaterialConstant>::Resolve(d3dApp, pmc, 1u));
+	AddBind(PixelConstantBuffer<PSMaterialConstant>::Resolve(d3dApp, pmc, 2u));
 
 	AddBind(InputLayout::Resolve(d3dApp, model.vertices.GetLayout(), pvsbc));
 

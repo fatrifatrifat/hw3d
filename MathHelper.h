@@ -18,13 +18,21 @@ public:
 	}
 
 	template<typename T>
-	static constexpr T wrap_angle(T theta)
+	T wrap_angle(T theta)
 	{
-		const T modded = fmod(theta, (T)2.0 * (T)PiD);
-		return (modded > (T)PiD) ?
-			(modded - (T)2.0 * (T)PiD) :
-			modded;
+		constexpr T twoPi = (T)2 * (T)MathHelper::PiD;
+		const T mod = fmod(theta, twoPi);
+		if (mod > (T)MathHelper::PiD)
+		{
+			return mod - twoPi;
+		}
+		else if (mod < (T)MathHelper::PiD)
+		{
+			return mod + twoPi;
+		}
+		return mod;
 	}
+
 
 	static const float Infinity;
 	static const float Pi;

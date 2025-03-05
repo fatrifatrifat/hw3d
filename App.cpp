@@ -5,6 +5,7 @@
 #include <assimp\Importer.hpp>
 #include <assimp\scene.h>
 #include <assimp\postprocess.h>
+#include "NormalMapTwerker.h"
 #include <sstream>
 
 GDIPlusManager gdipm;
@@ -20,10 +21,27 @@ MainWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	return app->WndProc(hwnd, msg, wParam, lParam);
 }
 
-App::App(HINSTANCE hInst, int width, int height)
+App::App(HINSTANCE hInst, int width, int height, const std::string& commandLine)
 	: hInstance(hInst), width(width), height(height)
 {
 	app = this;	
+	// makeshift cli for doing some preprocessing bullshit (so many hacks here)
+	if (this->commandLine != "")
+	{
+		int nArgs;
+		const auto pLineW = GetCommandLineW();
+		const auto pArgs = CommandLineToArgvW(pLineW, &nArgs);
+		if (nArgs >= 4 && std::wstring(pArgs[1]) == L"--ntwerk-rotx180")
+		{
+			const std::wstring pathInWide = pArgs[2];
+			const std::wstring pathOutWide = pArgs[3];
+			NormalMapTwerker::RotateXAxis180(
+				std::string(pathInWide.begin(), pathInWide.end()),
+				std::string(pathOutWide.begin(), pathOutWide.end())
+			);
+			throw std::runtime_error("Normal map processed successfully. Just kidding about that whole runtime error thing.");
+		}
+	}
 }
 
 HWND App::GetHWnd() const
@@ -58,7 +76,15 @@ void App::InitApp()
 	}
 
 	light = std::make_unique<PointLight>(*d3dApp);
-	goblin = std::make_unique<Model>(*d3dApp, "Models\\gobber\\GoblinX.obj");
+	goblin = std::make_unique<Model>(*d3dApp, "Models\\gobber\\GoblinX.obj", 6.0f);
+	wall = std::make_unique<Model>(*d3dApp, "Models\\brick_wall\\brick_wall.obj", 6.0f);
+	tp = std::make_unique<TestPlane>(*d3dApp, 6.0f);
+	nano = std::make_unique<Model>(*d3dApp, "Models\\nano_textured\\nanosuit.obj", 2.0f);
+
+	wall->SetRootTransform(DirectX::XMMatrixTranslation(-12.0f, 0.0f, 0.0f));
+	tp->SetPos({ 12.0f,0.0f,0.0f });
+	goblin->SetRootTransform(DirectX::XMMatrixTranslation(0.0f, 0.0f, -4.0f));
+	nano->SetRootTransform(DirectX::XMMatrixTranslation(0.0f, -7.0f, 6.0f));
 
 	d3dApp->SetProjection(DirectX::XMMatrixPerspectiveLH(1.0f, 3.0f / 4.0f, 0.5f, 40.0f));
 	gm.Start();
@@ -147,6 +173,9 @@ void App::Draw()
 	light->Bind(*d3dApp, cam.GetMatrix());
 
 	goblin->Draw(*d3dApp);
+	wall->Draw(*d3dApp);
+	tp->Draw(*d3dApp);
+	nano->Draw(*d3dApp);
 	light->Draw(*d3dApp);
 
 	while (const auto e = kbd.ReadKey())
@@ -239,6 +268,9 @@ void App::Draw()
 	cam.SpawnControlWindow();
 	light->SpawnControlWindow();
 	goblin->ShowWindow(*d3dApp, "gobber");
+	wall->ShowWindow(*d3dApp, "wall");
+	tp->SpawnControlWindow(*d3dApp);
+	nano->ShowWindow(*d3dApp, "nanosuit");
 
 	d3dApp->EndScene();
 }
