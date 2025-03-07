@@ -18,9 +18,9 @@ public:
 	}
 
 	template<typename T>
-	T wrap_angle(T theta)
+	static T wrap_angle(T theta)
 	{
-		constexpr T twoPi = (T)2 * (T)MathHelper::PiD;
+		const T twoPi = (T)2 * (T)MathHelper::PiD;
 		const T mod = fmod(theta, twoPi);
 		if (mod > (T)MathHelper::PiD)
 		{

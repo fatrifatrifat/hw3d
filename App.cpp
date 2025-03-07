@@ -75,11 +75,11 @@ void App::InitApp()
 		return;
 	}
 
-	light = std::make_unique<PointLight>(*d3dApp);
-	goblin = std::make_unique<Model>(*d3dApp, "Models\\gobber\\GoblinX.obj", 6.0f);
 	wall = std::make_unique<Model>(*d3dApp, "Models\\brick_wall\\brick_wall.obj", 6.0f);
 	tp = std::make_unique<TestPlane>(*d3dApp, 6.0f);
 	nano = std::make_unique<Model>(*d3dApp, "Models\\nano_textured\\nanosuit.obj", 2.0f);
+	goblin = std::make_unique<Model>(*d3dApp, "Models\\gobber\\GoblinX.obj", 6.0f);
+	light = std::make_unique<PointLight>(*d3dApp);
 
 	wall->SetRootTransform(DirectX::XMMatrixTranslation(-12.0f, 0.0f, 0.0f));
 	tp->SetPos({ 12.0f,0.0f,0.0f });
@@ -172,10 +172,10 @@ void App::Draw()
 	d3dApp->SetCamera(cam.GetMatrix());
 	light->Bind(*d3dApp, cam.GetMatrix());
 
-	goblin->Draw(*d3dApp);
 	wall->Draw(*d3dApp);
 	tp->Draw(*d3dApp);
 	nano->Draw(*d3dApp);
+	goblin->Draw(*d3dApp);
 	light->Draw(*d3dApp);
 
 	while (const auto e = kbd.ReadKey())
