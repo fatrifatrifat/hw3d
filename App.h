@@ -84,5 +84,6 @@ private:
 	std::unique_ptr<Model> goblin;
 	std::unique_ptr<Model> nano;
 	std::unique_ptr<Model> wall;
+	std::unique_ptr<Model> sponza;
 	std::unique_ptr<TestPlane> tp;
 };
