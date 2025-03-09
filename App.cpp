@@ -95,7 +95,13 @@ void App::InitApp()
 	}
 
 	//wall = std::make_unique<Model>(*d3dApp, "Models\\brick_wall\\brick_wall.obj", 6.0f);
-	//tp = std::make_unique<TestPlane>(*d3dApp, 6.0f);
+	DirectX::XMFLOAT4 mat = { 1.0f,0.3f,0.3f,0.0f };
+	rtp = std::make_unique<TestPlane>(*d3dApp, 6.0f, mat);
+	mat = { 0.3f, 0.3f, 1.0f, 0.0f };
+	btp = std::make_unique<TestPlane>(*d3dApp, 6.0f, mat);
+
+	rtp->SetPos(cam.GetPos());
+	btp->SetPos(cam.GetPos());
 	//nano = std::make_unique<Model>(*d3dApp, "Models\\nano_textured\\nanosuit.obj", 2.0f);
 	//goblin = std::make_unique<Model>(*d3dApp, "Models\\gobber\\GoblinX.obj", 6.0f);
 	sponza = std::make_unique<Model>(*d3dApp, "Models\\Sponza\\sponza.obj", 1/20.0f);
@@ -197,6 +203,8 @@ void App::Draw()
 	nano->Draw(*d3dApp);
 	goblin->Draw(*d3dApp);*/
 	sponza->Draw(*d3dApp);
+	btp->Draw(*d3dApp);
+	rtp->Draw(*d3dApp);
 	light->Draw(*d3dApp);
 
 	while (const auto e = kbd.ReadKey())
@@ -286,8 +294,18 @@ void App::Draw()
 		}
 	}
 
+	if (ImGui::Begin("Simulation Speed"))
+	{
+		ImGui::SliderFloat("Speed Factor", &speed_factor, 0.0f, 6.0f, "%.4f", 3.2f);
+		ImGui::Text("%.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+		ImGui::Text("Status: %s", kbd.KeyIsPressed(VK_SPACE) ? "PAUSED" : "RUNNING (hold spacebar to pause)");
+	}
+	ImGui::End();
+
 	cam.SpawnControlWindow();
 	light->SpawnControlWindow();
+	rtp->SpawnControlWindow(*d3dApp, "red");
+	btp->SpawnControlWindow(*d3dApp, "blue");
 	/*goblin->ShowWindow(*d3dApp, "gobber");
 	wall->ShowWindow(*d3dApp, "wall");
 	tp->SpawnControlWindow(*d3dApp);

@@ -3,6 +3,7 @@
 #include "Vertex.h"
 #include "Sphere.h"
 
+
 SolidSphere::SolidSphere(D3DApp& d3dApp, float radius)
 {
 	using namespace Bind;
@@ -32,6 +33,10 @@ SolidSphere::SolidSphere(D3DApp& d3dApp, float radius)
 	AddBind(Topology::Resolve(d3dApp, D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST));
 
 	AddBind(std::make_shared<TransformCbuf>(d3dApp, *this));
+
+	AddBind(Blender::Resolve(d3dApp, false));
+
+	AddBind(Rasterizer::Resolve(d3dApp, false));
 }
 
 void SolidSphere::SetPos(DirectX::XMFLOAT3 pos) noexcept
